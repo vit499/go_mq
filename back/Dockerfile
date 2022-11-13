@@ -1,15 +1,15 @@
 FROM golang:1.16.5-alpine3.14 AS builder
-
-WORKDIR /usr/local/go/src/
-
-ADD app/ /usr/local/go/src/
-
-RUN go clean --modcache
-RUN go build -mod=readonly -o app cmd/main/app.go
-
+#RUN apk --no-cache add gcc g++ make git
+WORKDIR /build
+COPY . .
+RUN go get ./...
+RUN go build -o /main cmd/main.go
+#RUN GOOS=linux go build -ldflags="-s -w" -o ./bin/web-app ./main.go
 FROM alpine:3.14
 
-COPY --from=builder /usr/local/go/src/app /
-#COPY --from=builder /usr/local/go/src/config.yml /
-
-CMD ["/app"]
+#RUN apk --no-cache add ca-certificates
+#WORKDIR /usr/bin
+COPY --from=build /main /bin/main
+#EXPOSE 80
+#ENTRYPOINT /go/bin/web-app --port 80
+ENTRYPOINT ["/bin/main"]
