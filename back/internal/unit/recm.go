@@ -1,12 +1,12 @@
 package unit
 
 import (
-	"c2/pkg/utils"
-	"log"
+	"back/pkg/utils"
+	//"log"
 	"strings"
 )
 
-func (u *Unit)FillBuf(src string, topic string) {
+func (u *Unit)FillBuf(topic string, src string) {
 	if topic == "config/fout" {
 		b := utils.Str2Hex(src)
 		u.FillFout(b)
@@ -15,13 +15,12 @@ func (u *Unit)FillBuf(src string, topic string) {
 		u.FillFtout(b)
 	} else if topic == "config/indtemper" {
 		b := utils.Str2Hex(src)
-		u.FillFtout(b)
+		u.FillIndTemper(b)
 	} else if topic == "status/sout" {
 		b := utils.Str2Hex(src)
-		u.FillFtout(b)
+		u.FillSout(b)
 	} else if topic == "status/param" {
-		b := utils.Str2Hex(src)
-		u.FillFtout(b)
+		u.FillParam(src)
 	}
 }
 
@@ -39,7 +38,7 @@ func (u *Unit)FillParam(src string) {
 		  u.FillTcp(val)
 		} else if(key == "temper") {
 			b := utils.Str2Hex(val)
-		  u.FillFtout(b)
+		  u.FillTemper(b)
 		}
 	}
 }

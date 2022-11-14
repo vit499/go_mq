@@ -2,7 +2,7 @@ package main_test
 
 import (
 	//"fmt"
-	"c2/pkg/utils"
+	"back/pkg/utils"
 	"strings"
 	//"c2/internal/unit"
 	"fmt"

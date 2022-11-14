@@ -1,30 +1,37 @@
 package main
 
 import (
+	//"back/internal/http_mq"
+	//"back/internal/mq_mq"
+	"back/internal/unit"
 	"log"
-	"net/http"
-	"github.com/gin-gonic/gin"
 )
 
-func Hello(c *gin.Context) {
-  c.JSON(http.StatusOK, gin.H{
-		"message": "ok",
-	})
-}
-func HelloUser(c *gin.Context) {
-  name := c.Param("name")
-	c.String(http.StatusOK, "hello %s ", name)
-}
 
 func main() {
 	log.Printf("Starting...")
 
-	gin.DisableConsoleColor()
-	router := gin.Default()
-	router.Use(gin.Logger())
+	up := make([]*unit.Unit, 10)
 
-	router.GET("/", Hello)
-	router.GET("/user/:name", HelloUser)
+	u1 := unit.Unit{}
+	u1.Init("0802")
+	up[0] = &u1
 
-	router.Run(":3100")
+	u2 := unit.Unit{}
+	u2.Init("0803")
+	up[1] = &u2
+
+	u3 := unit.Unit{}
+	u3.Init("0804")
+	up[2] = &u3
+
+	//h := http_mq.HttpServer{}
+	//log.Fatal(h.StartHttp(":3100"))
+
+	// mq := mq_mq.Mq{}
+	// mq.Init(up, 3)
+	// mq.Start()
+
+	u3.PrintUnit()
+
 }
