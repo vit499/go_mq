@@ -29,6 +29,7 @@ func main() {
 	// log.Fatal(h.StartHttp(":3100"))
 
 	mq := mq_mq.Mq{}
+	defer mq.Disconnect()
 	mq.Init("tcp://vit496.ru:2083", "ab@m.ru", "1111")
 	mq.InitClient()
 	if err := mq.Connect(); err != nil {

@@ -221,6 +221,7 @@ func (m *Mq) Disconnect() {
 	if m.client != nil {
 		m.client.Disconnect(1000)
 	}
+	utils.D_1ms(2)
 }
 
 // func (m *Mq) wait_end () {

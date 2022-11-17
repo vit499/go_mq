@@ -12,17 +12,21 @@ func char2Bcd(c uint8) int {
 	}
 	return b
 }
+
 // [ 0x32, 0x33 ] -> 0x23
-func symHex2Hex(s []uint8, offset int) int {
-	var r int
-	r = char2Bcd(s[offset]) << 4
-	r += char2Bcd(s[offset + 1])
-	return r
-}
+// func symHex2Hex(s []uint8, offset int) int {
+// 	var r int
+// 	r = char2Bcd(s[offset]) << 4
+// 	r += char2Bcd(s[offset + 1])
+// 	return r
+// }
 // "23" -> 0x23
 func sym2Hex(s string, offset int) int {
-	b := []uint8(s)
-	r := symHex2Hex(b, offset)
+	// b := []uint8(s)
+	// r := symHex2Hex(b, offset)
+	var r int
+	r = char2Bcd(s[offset]) << 4
+	r += char2Bcd(s[offset+1])
 	return r
 }
 
@@ -30,18 +34,19 @@ func Str2Hex(s string) []int {
 	len_dst := len(s) / 2
 	dst := make([]int, len_dst)
 	for i := 0; i < len_dst; i++ {
-		dst[i] = sym2Hex(s, i * 2)
+		dst[i] = sym2Hex(s, i*2)
 	}
 	//log.Printf("src= %s, dst= % X ", s, dst)
 	return dst
 }
+
 //------------------------------
 
 // 0xC1 -> [1,0,0,0, 0,0,1,1]
 func hex2Bits(c int) []int {
 	b := make([]int, 8)
 	for i := 0; i < 8; i++ {
-		if (c & (1 << i) != 0) {
+		if c&(1<<i) != 0 {
 			b[i] = 1
 		} else {
 			b[i] = 0
@@ -51,15 +56,16 @@ func hex2Bits(c int) []int {
 }
 func hexBuf2Bits(src []int) []int {
 	len_src := len(src)
-	dst := make([]int, len_src * 8)
+	dst := make([]int, len_src*8)
 	for i := 0; i < len_src; i++ {
 		a := hex2Bits(src[i])
 		for j := 0; j < 8; j++ {
-			dst[i * 8 + j] = a[j]
+			dst[i*8+j] = a[j]
 		}
 	}
 	return dst
 }
+
 // "0482" -> [0,0,1,0,0,0,0,0, 0,1,0,0,0,0,0,1]
 func Str2Bits(s string) []int {
 	b := Str2Hex(s)
@@ -67,6 +73,7 @@ func Str2Bits(s string) []int {
 	//log.Printf("src= %s, dst= % X ", s, dst)
 	return dst
 }
+
 //====================================
 
 func bcd2CharH(b int) uint8 {
@@ -89,13 +96,14 @@ func bcd2CharL(b int) uint8 {
 	}
 	return c
 }
+
 // 0x25 0x31 -> "2531"
 func Hex2Str(buf []int, len_src int) string {
 	len_dst := len_src * 2
 	strBuf := make([]uint8, len_dst)
 	for i := 0; i < len_src; i++ {
-		strBuf[i * 2] = bcd2CharH(buf[i])
-		strBuf[i * 2 + 1] = bcd2CharL(buf[i])
+		strBuf[i*2] = bcd2CharH(buf[i])
+		strBuf[i*2+1] = bcd2CharL(buf[i])
 	}
 	s := string(strBuf)
 	return s
