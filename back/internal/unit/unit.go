@@ -10,15 +10,15 @@ const NUMBER_OUTS = 4
 const NUMBER_TEMPER = 3
 
 type Unit struct {
-	StrUnit string
-	Fout []int       // function of outs
-	Sout []int       // status outs
-	Ftout []int      // temper for ON-OFF
-	IndTemper []int  // index of tempers for out
-	Temper []int     // value tempers
-	U12v string
-	LevelGsm int
-	LevelWifi int
+	StrUnit   string `json:"StrUnit" binding:"required"`
+	Fout      []int  `json:"Fout" binding:"required"`      // function of outs
+	Sout      []int  `json:"Sout" binding:"required"`      // status outs
+	Ftout     []int  `json:"Ftout" binding:"required"`     // temper for ON-OFF
+	IndTemper []int  `json:"IndTemper" binding:"required"` // index of tempers for out
+	Temper    []int  `json:"Temper" binding:"required"`    // value tempers
+	U12v      string `json:"U12v" binding:"required"`
+	LevelGsm  int    `json:"LevelGsm" binding:"required"`
+	LevelWifi int    `json:"LevelWifi" binding:"required"`
 }
 
 func (u *Unit) Init(strUnit string) {
@@ -28,7 +28,7 @@ func (u *Unit) Init(strUnit string) {
 	u.Ftout = make([]int, NUMBER_OUTS)
 	u.IndTemper = make([]int, NUMBER_OUTS)
 	u.Temper = make([]int, NUMBER_TEMPER)
-	for i := 0; i < NUMBER_OUTS; i++ { 
+	for i := 0; i < NUMBER_OUTS; i++ {
 		u.Fout[i] = 0
 		u.Sout[i] = 0
 		u.Ftout[i] = 0
@@ -44,7 +44,7 @@ func (u *Unit) Init(strUnit string) {
 
 func (u *Unit) FillFout(buf []int) {
 	len_src := len(buf)
-	if(len_src > NUMBER_OUTS) {
+	if len_src > NUMBER_OUTS {
 		//log.Printf("len=%d", len_src)
 		len_src = NUMBER_OUTS
 	}
@@ -54,7 +54,7 @@ func (u *Unit) FillFout(buf []int) {
 }
 func (u *Unit) FillFtout(buf []int) {
 	len_src := len(buf)
-	if(len_src > NUMBER_OUTS) {
+	if len_src > NUMBER_OUTS {
 		//log.Printf("len=%d", len_src)
 		len_src = NUMBER_OUTS
 	}
@@ -64,7 +64,7 @@ func (u *Unit) FillFtout(buf []int) {
 }
 func (u *Unit) FillSout(buf []int) {
 	len_src := len(buf)
-	if(len_src > NUMBER_OUTS) {
+	if len_src > NUMBER_OUTS {
 		//.Printf("len=%d", len_src)
 		len_src = NUMBER_OUTS
 	}
@@ -74,7 +74,7 @@ func (u *Unit) FillSout(buf []int) {
 }
 func (u *Unit) FillIndTemper(buf []int) {
 	len_src := len(buf)
-	if(len_src > NUMBER_OUTS) {
+	if len_src > NUMBER_OUTS {
 		//log.Printf("len=%d", len_src)
 		len_src = NUMBER_OUTS
 	}
@@ -84,7 +84,7 @@ func (u *Unit) FillIndTemper(buf []int) {
 }
 func (u *Unit) FillTemper(buf []int) {
 	len_src := len(buf)
-	if(len_src > NUMBER_TEMPER) {
+	if len_src > NUMBER_TEMPER {
 		//log.Printf("len=%d", len_src)
 		len_src = NUMBER_TEMPER
 	}
@@ -92,14 +92,14 @@ func (u *Unit) FillTemper(buf []int) {
 		u.Temper[i] = buf[i]
 	}
 }
-func (u *Unit)Fill12v(s string) {
+func (u *Unit) Fill12v(s string) {
 	u.U12v = s
 }
-func (u *Unit)FillLevelWifi(s int) {
+func (u *Unit) FillLevelWifi(s int) {
 	u.LevelWifi = s
 }
 
-func (u * Unit)PrintUnit() {
+func (u *Unit) PrintUnit() {
 	s := u.StrUnit
 	log.Printf("Unit= %s", s)
 	s = utils.Hex2Str(u.Fout, NUMBER_OUTS)
@@ -121,9 +121,9 @@ func (u * Unit)PrintUnit() {
 	}
 	log.Printf("b=%s", b)
 	if u.Temper[0] != 0x80 {
-	  log.Printf("T1=%d", u.Temper[0])
+		log.Printf("T1=%d", u.Temper[0])
 	}
 	if u.Temper[1] != 0x80 {
-	  log.Printf("T2=%d", u.Temper[1])
+		log.Printf("T2=%d", u.Temper[1])
 	}
 }

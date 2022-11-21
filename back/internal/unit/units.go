@@ -2,6 +2,8 @@ package unit
 
 import (
 	"back/internal/mq_mq"
+	"encoding/json"
+	//"fmt"
 	"log"
 	"strings"
 
@@ -9,9 +11,9 @@ import (
 )
 
 type Units struct {
-	up   []*Unit
-	Cnt  int
-	Mq   *mq_mq.Mq
+	up  []*Unit
+	Cnt int
+	Mq  *mq_mq.Mq
 }
 
 func GetUnits(mq *mq_mq.Mq) *Units {
@@ -34,7 +36,7 @@ func (us *Units) AddUnit(s string) {
 func (us *Units) getIndUnit(s string) int {
 	r := 100
 	for i := 0; i < us.Cnt; i++ {
-		if(us.up[i].StrUnit == s) {
+		if us.up[i].StrUnit == s {
 			return i
 		}
 	}
@@ -53,7 +55,7 @@ func (us *Units) FillBuf(topic string, mes string) {
 	us.up[indUnit].PrintUnit()
 }
 func (us *Units) RecHandle(_ mqtt.Client, msg mqtt.Message) {
-	topic := msg.Topic()  // ab@m.ru/0803/devsend/
+	topic := msg.Topic() // ab@m.ru/0803/devsend/
 	// t := strings.Split(topic, "/")
 	// if(t[0] != m.login) {
 	// 	return
@@ -62,6 +64,16 @@ func (us *Units) RecHandle(_ mqtt.Client, msg mqtt.Message) {
 	us.FillBuf(topic, mes)
 }
 
-func (us *Units) getJsonUnit(s string) string {
+func (us *Units) GetJsonUnit(ind int) ([]byte, error) {
+	var u *Unit
+	u = us.up[ind]
+	b, err := json.Marshal(u)
+	if err != nil {
+		log.Printf("err %s", err)
+		return nil, err
+	}
+	return b, nil
+}
+func (us *Units) getJsonUnits(s string) string {
 	return "1"
 }

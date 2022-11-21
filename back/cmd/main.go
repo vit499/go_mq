@@ -5,33 +5,22 @@ import (
 	"back/internal/mq_mq"
 	"back/internal/unit"
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
-
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	log.Printf("Starting...")
-
-	// up := make([]*unit.Unit, 10)
-
-	// u1 := unit.Unit{}
-	// u1.Init("0802")
-	// up[0] = &u1
-
-	// u2 := unit.Unit{}
-	// u2.Init("0803")
-	// up[1] = &u2
-
-	// u3 := unit.Unit{}
-	// u3.Init("0804")
-	// up[2] = &u3
-
-	// h := http_mq.HttpServer{}
-	// log.Fatal(h.StartHttp(":3100"))
 
 	mq := mq_mq.Mq{}
 	defer mq.Disconnect()
-	mq.Init("tcp://vit496.ru:2083", "ab@m.ru", "1111")
-	mq.InitClient()
+
+	mq.InitClient(os.Getenv("MQTT_HOST"), os.Getenv("MQTT_USER"), os.Getenv("MQTT_PASS"))
 	if err := mq.Connect(); err != nil {
 		log.Printf("mqtt connect err: %s ", err)
 	}
@@ -40,9 +29,10 @@ func main() {
 	us := unit.GetUnits(&mq)
 
 	us.AddUnit("0802")
+	us.AddUnit("0803")
+	us.AddUnit("0804")
 
-	//u3.PrintUnit()
-
-	h := http_mq.HttpServer{}
+	h := http_mq.GetHttpServer(us)
 	log.Fatal(h.StartHttp("127.0.0.1:3100"))
+
 }
