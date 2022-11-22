@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+
 	//"os"
 	"time"
 
@@ -55,8 +56,6 @@ func (m *Mq) getTopicSub(unit string) string {
 // 	s := fmt.Sprintf("%s/%s/devrec/control", LOGIN, unit)
 // 	return s
 // }
-
-// handle is called when a message is received
 
 type Mq struct {
 	login    string
