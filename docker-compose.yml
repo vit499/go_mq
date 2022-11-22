@@ -4,7 +4,7 @@ services:
   api_go:
     build: ./back
     container_name: api_go
-    restart: always
+    restart: unless-stoped
     ports:
       - 3100:3100
     environment:
