@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 )
 
 // Сделать канал публичным. После получения id можно сделать частным.
@@ -16,10 +15,12 @@ import (
 // https://api.telegram.org/botXXXX/getChat?chat_id=@xxxgroup
 
 type Tgbot struct {
+	token string     // := os.Getenv("TOKEN")
+	chat_id string   // := os.Getenv("CHAT")
 }
 
-func getTgbot() *Tgbot {
-	tgbot := Tgbot{}
+func GetTgbot(token string, chat_id string) *Tgbot {
+	tgbot := Tgbot{token: token, chat_id: chat_id}
 
 	return &tgbot
 }
@@ -54,14 +55,14 @@ func cc3(chat_id string, src string) io.Reader {
 // в url подставить токен бота
 // в body подставить chat_id и text
 func (tg *Tgbot) SendMes(src string) {
-	token := os.Getenv("TOKEN")
-	chat_id := os.Getenv("CHAT")
-	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", token)
+	// token := os.Getenv("TOKEN")
+	// chat_id := os.Getenv("CHAT")
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", tg.token)
 
-	body := cc1(chat_id, src)
-	//body := cc2(chat_id, src)
-	//body := cc3(chat_id, src)
-
+	body := cc1(tg.chat_id, src)
+	//body := cc2(tg.chat_id, src)
+	//body := cc3(tg.chat_id, src)
+  log.Printf("send to tg: %s ", src)
 	_, err := http.Post(url, "application/json", body)
 	if err != nil {
 		log.Printf("send bot err: %s", err.Error())

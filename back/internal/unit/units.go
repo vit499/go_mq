@@ -2,7 +2,8 @@ package unit
 
 import (
 	"back/internal/mq_mq"
-	"back/pkg/utils"
+	"back/pkg/tgbot"
+	//"back/pkg/utils"
 	"encoding/json"
 
 	//"fmt"
@@ -16,11 +17,12 @@ type Units struct {
 	up  []*Unit
 	Cnt int
 	Mq  *mq_mq.Mq
+	Tg *tgbot.Tgbot
 }
 
-func GetUnits(mq *mq_mq.Mq) *Units {
+func GetUnits(mq *mq_mq.Mq, tg *tgbot.Tgbot) *Units {
 	up1 := make([]*Unit, 10)
-	us := Units{up1, 0, mq}
+	us := Units{up1, 0, mq, tg}
 	return &us
 }
 func (us *Units) AddUnit(s string) {
@@ -53,8 +55,11 @@ func (us *Units) FillBuf(topic string, mes string) {
 	}
 	topic = strings.Join(t[3:], "/")
 	log.Printf("topic= %s, msg= %s ", topic, mes)
-	us.up[indUnit].FillBuf(topic, mes)
+	mesEvent := us.up[indUnit].FillBuf(topic, mes)
 	us.up[indUnit].PrintUnit()
+	if mesEvent != "" {
+		us.Tg.SendMes(mesEvent)
+	}
 }
 func (us *Units) RecHandle(_ mqtt.Client, msg mqtt.Message) {
 	topic := msg.Topic() // ab@m.ru/0803/devsend/

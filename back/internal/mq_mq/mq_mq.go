@@ -64,11 +64,12 @@ type Mq struct {
 	client   mqtt.Client
 }
 
-func (m *Mq) InitClient(addr string, login string, password string) {
-	m.login = login
-	m.password = password
-	m.addr = addr
-	m.client = nil
+func GetMq(addr string, login string, password string) *Mq {
+	m := Mq{login: login, addr: addr, password: password, client: nil}
+	return &m
+}
+
+func (m *Mq) InitClient() {
 	log.Printf("init mqtt client...")
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(m.addr)

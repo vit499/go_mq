@@ -4,7 +4,7 @@ import (
 	"back/internal/http_mq"
 	"back/internal/mq_mq"
 	"back/internal/unit"
-	"back/pkg/utils"
+	"back/pkg/tgbot"
 	"log"
 	"os"
 
@@ -18,16 +18,18 @@ func main() {
 	}
 	log.Printf("Starting...")
 
-	mq := mq_mq.Mq{}
+	mq := mq_mq.GetMq(os.Getenv("MQTT_HOST"), os.Getenv("MQTT_USER"), os.Getenv("MQTT_PASS"))
 	defer mq.Disconnect()
 
-	mq.InitClient(os.Getenv("MQTT_HOST"), os.Getenv("MQTT_USER"), os.Getenv("MQTT_PASS"))
+	mq.InitClient()
 	if err := mq.Connect(); err != nil {
 		log.Printf("mqtt connect err: %s ", err)
 	}
 	log.Printf("mq -- ")
 
-	us := unit.GetUnits(&mq)
+	tg := tgbot.GetTgbot(os.Getenv("TOKEN"), os.Getenv("CHAT"))
+
+	us := unit.GetUnits(mq, tg)
 
 	us.AddUnit("0802")
 	us.AddUnit("0803")
