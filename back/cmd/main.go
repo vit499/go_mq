@@ -36,6 +36,8 @@ func main() {
 	us.AddUnit("0804")
 
 	h := http_mq.GetHttpServer(us)
-	log.Fatal(h.StartHttp("127.0.0.1:3100"))
+	httpHost := os.Getenv("HTTP_HOST")
+	log.Printf("Start HTTP %s ", httpHost)
+	log.Fatal(h.StartHttp(httpHost))
 
 }
