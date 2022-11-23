@@ -89,7 +89,11 @@ func (u *Unit) FillTemper(buf []int) {
 		len_src = NUMBER_TEMPER
 	}
 	for i := 0; i < len_src; i++ {
-		u.Temper[i] = buf[i]
+		c := buf[i] & 0xff
+		if c != 0x80 && (c&(1<<7)) != 0 {
+			c = c - 256
+		}
+		u.Temper[i] = c
 	}
 }
 func (u *Unit) Fill12v(s string) {
