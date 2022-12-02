@@ -2,7 +2,6 @@ package unit
 
 import (
 	"back/pkg/utils"
-	"log"
 	//"log"
 	"strings"
 )
