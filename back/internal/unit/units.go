@@ -17,7 +17,7 @@ type Units struct {
 	up  []*Unit
 	Cnt int
 	Mq  *mq_mq.Mq
-	Tg *tgbot.Tgbot
+	Tg  *tgbot.Tgbot
 }
 
 func GetUnits(mq *mq_mq.Mq, tg *tgbot.Tgbot) *Units {
@@ -56,7 +56,7 @@ func (us *Units) FillBuf(topic string, mes string) {
 	topic = strings.Join(t[3:], "/")
 	log.Printf("topic= %s, msg= %s ", topic, mes)
 	mesEvent := us.up[indUnit].FillBuf(topic, mes)
-	us.up[indUnit].PrintUnit()
+	//us.up[indUnit].PrintUnit()
 	if mesEvent != "" {
 		us.Tg.SendMes(mesEvent)
 	}
