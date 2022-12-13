@@ -51,7 +51,7 @@ func (u *Unit) FillParam(src string) {
 
 // 1111E13002015
 func (u *Unit) CheckEv(s string) string {
-	res := true
+	res := false
 	ev := strings.Split(s, "")
 	nobj := strings.Join(ev[:4], "")
 	cid := strings.Join(ev[4:8], "")
@@ -59,18 +59,22 @@ func (u *Unit) CheckEv(s string) string {
 	// zone := strings.Join(ev[10:], "")
 
 	//log.Printf("unit= %s cid= %s zone= %s part= %s ", nobj, cid, zone, part)
-	// if cid == "E715" {
-	// 	res = false
-	// }
-	if nobj == "0804" {
-		return s
+	if cid == "E130" {
+		res = true
+	} else if cid == "E628" {
+		res = true
+	} else if cid == "E702" {
+		res = true
+	} else if cid == "E062" || cid == "R062" {
+		res = true
+	} else if (nobj == "0804") && (cid == "E715" || cid == "R715") {
+		//res = true
+	} else if (nobj == "0803") && (cid == "E301" || cid == "R301") {
+		res = true
+	} else if cid == "E409" || cid == "R409" {
+		res = true
 	}
-	switch cid {
-	case "E715":
-		res = false
-	case "R715":
-		res = false
-	}
+
 	if !res {
 		return ""
 	}
