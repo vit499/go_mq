@@ -1,7 +1,6 @@
 package http_mq
 
 import (
-	//"fmt"
 	"back/internal/unit"
 	"fmt"
 	"net/http"
@@ -71,6 +70,7 @@ func (h *HttpServer) StartHttp(addr string) error {
 	router.GET("/", Index)
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
+	router.GET("/api/t", h.GetUnitTemper)
 
 	err := http.ListenAndServe(addr, router)
 	return err
@@ -101,7 +101,52 @@ func (h *HttpServer) GetUnit(w http.ResponseWriter, r *http.Request, ps httprout
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	// log.Printf("cors ?")
+	// if r.Header.Get("Access-Control-Request-Method") != "" {
+	// 	log.Printf("cors ?")
+	// 	// Set CORS headers
+	// 	header := w.Header()
+	// 	header.Set("Access-Control-Allow-Methods", header.Get("Allow"))
+	// 	header.Set("Access-Control-Allow-Origin", "*")
+	// }
+	header := w.Header()
+	// header.Set("Access-Control-Allow-Origin", "*")
+	header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
+}
+
+func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+
+	temper := make([]int, 10)
+	descr := []string{
+		"f1",
+		"",
+		"",
+		"f1",
+		"f2",
+		"",
+		"outdoor",
+		"f0",
+		"",
+	}
+	for ind := 0; ind < h.units.Cnt; ind++ {
+		t, _ := h.units.GetUnitTemper(ind)
+		temper[ind*3] = t[0]
+		temper[ind*3+1] = t[1]
+		temper[ind*3+2] = t[2]
+	}
+	s := ""
+	for ind := 0; ind < 9; ind++ {
+		if temper[ind] != 0x80 {
+			s = fmt.Sprintf(" %s %s = %d <br>", s, descr[ind], temper[ind])
+		}
+	}
+	s1 := fmt.Sprintf("<html>%s</html>", s)
+
+	//s := fmt.Sprintf("outdoor=%d, floor0=%d", temper[0], temper[1])
+	// header := w.Header()
+	// header.Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(s1))
 }

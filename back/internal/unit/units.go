@@ -71,6 +71,12 @@ func (us *Units) RecHandle(_ mqtt.Client, msg mqtt.Message) {
 	us.FillBuf(topic, mes)
 }
 
+func (us *Units) GetUnitTemper(ind int) ([]int, error) {
+	var u *Unit
+	u = us.up[ind]
+	b := u.Temper
+	return b, nil
+}
 func (us *Units) GetJsonUnit(ind int) ([]byte, error) {
 	var u *Unit
 	u = us.up[ind]
