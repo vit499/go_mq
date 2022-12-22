@@ -17,3 +17,9 @@ services:
     logging:
       options:
         max-size: 10m
+    networks:
+      - v1-network
+        
+networks:
+  v1-network:
+    external: true
