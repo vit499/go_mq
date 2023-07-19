@@ -1,109 +1,90 @@
 package mq_mq
 
 import (
-	//"encoding/json"
-	//"back/internal/unit"
+	"back/pkg/config"
+	"back/pkg/logger"
 	"back/pkg/utils"
-	"fmt"
-	"log"
-	"math/rand"
-
-	//"os"
-	"time"
-
-	// "os/signal"
-	// "syscall"
-	//"strings"
-	//"time"
+	"sync/atomic"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
 const (
 	QOS1 = 1
-	//MQTT_ADDR   = "tcp://vit496.ru:2084"
-	WRITETOLOG  = true  // If true then received messages will be written to the console
-	WRITETODISK = false // If true then received messages will be written to the file below
-	OUTPUTFILE  = "/binds/receivedMessages.txt"
 )
 
-// type handler struct {
-// }
-
-// func NewHandler() *handler {
-// 	return &handler{}
-// }
-
-// type Message struct {
-// 	Count uint64
-// }
-
-func getClientId() string {
-	rand.Seed(time.Now().UnixNano())
-	r1 := rand.Intn(65000)
-	r2 := rand.Intn(65000)
-	fmt.Printf("\r\n r2=%X%X", r1, r2)
-	s := fmt.Sprintf("%s%X%X", "22223333", r1, r2)
-	return s
-}
-func (m *Mq) getTopicSub(unit string) string {
-	s := fmt.Sprintf("%s/%s/devsend/#", m.login, unit)
-	//log.Printf("sub topic: %s ", s)
-	return s
-}
-
-// func getTopicPub(unit string) string {
-// 	s := fmt.Sprintf("%s/%s/devrec/control", LOGIN, unit)
-// 	return s
-// }
-
 type Mq struct {
-	login    string
-	password string
-	addr     string
-	client   mqtt.Client
+	Login     string
+	password  string
+	addr      string
+	client    mqtt.Client
+	logger    *logger.Logger
+	connected atomic.Value
+	subOk     atomic.Value
 }
 
-func GetMq(addr string, login string, password string) *Mq {
-	m := Mq{login: login, addr: addr, password: password, client: nil}
+func Get(logger *logger.Logger) *Mq {
+	cfg := config.Get()
+	Login := cfg.MqUser
+	addr := cfg.MqHost
+	password := cfg.MqPass
+	m := Mq{
+		Login: Login, addr: addr,
+		password:  password,
+		client:    nil,
+		logger:    logger,
+		connected: atomic.Value{},
+		subOk:     atomic.Value{},
+	}
+
+	m.subOk.Store(false)
+	m.connected.Store(false)
+
+	m.InitClient()
+	go m.Connect()
+
 	return &m
 }
 
 func (m *Mq) InitClient() {
-	log.Printf("init mqtt client...")
+	m.logger.Info().Msg("init mqtt client...")
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(m.addr)
-	opts.SetClientID(getClientId())
-	opts.SetUsername(m.login)
+	opts.SetClientID(utils.GetClientId())
+	opts.SetUsername(m.Login)
 	opts.SetPassword(m.password)
 	opts.ConnectRetry = false // true
 	opts.AutoReconnect = true
 
 	// Log events
 	opts.OnConnectionLost = func(cl mqtt.Client, err error) {
-		log.Printf("connection lost")
+		m.logger.Info().Msg("connection lost")
+		//m.subOk = false
+		m.connected.Store(false)
+		m.subOk.Store(false)
 	}
 	opts.OnConnect = func(c mqtt.Client) {
-		log.Printf("connection established")
+		m.logger.Info().Msg("connection established")
+		m.connected.Store(true)
 		//m.Sub(c)
 	}
 	opts.OnReconnecting = func(mqtt.Client, *mqtt.ClientOptions) {
-		log.Printf("attempting to reconnect")
+		m.logger.Info().Msg("attempting to reconnect")
 	}
 	m.client = mqtt.NewClient(opts)
 }
 
-func (m *Mq) Connect() error {
-	log.Printf("mqtt start connection ... ")
+func (m *Mq) Connect() {
+	m.logger.Info().Msg("mqtt start connection ... ")
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
-		//panic(token.Error())
-		return token.Error()
+		//return token.Error()
+		//return errors.Wrap(token.Error(), "mqtt connect fail")
+		m.logger.Info().Msgf("mqtt connect fail %s", token.Error())
 	}
-	log.Printf("mqtt ...")
-	return nil
+	m.logger.Info().Msg("mqtt ...")
 }
 func (m *Mq) Disconnect() {
-	log.Printf("mqtt disconnect")
+	m.logger.Info().Msg("mqtt disconnect")
 	if m.client != nil {
 		m.client.Disconnect(1000)
 	}
@@ -112,44 +93,40 @@ func (m *Mq) Disconnect() {
 
 func (m *Mq) Sub(strUnit string, handle func(_ mqtt.Client, msg mqtt.Message)) {
 	go func() {
-		log.Printf("sub unit %s, ", strUnit)
+		m.logger.Info().Msgf("sub unit %s, ", strUnit)
 		cnt := 0
 		if m.client == nil {
-			log.Printf(" no client ")
+			m.logger.Info().Msg(" no client ")
 			return
 		}
-		for {
-			if m.client.IsConnected() {
+		for { // wait connect to brocker if not connected yet
+			if m.connected.Load().(bool) {
 				break
 			}
 			utils.D_1s(1)
 			cnt++
-			log.Printf(" mqtt not connected %d ", cnt)
+			m.logger.Info().Msgf(" mqtt not connected yet, cnt=%d ", cnt)
 			if cnt > 9 {
 				return
 			}
 		}
-		log.Printf("start sub %s ", strUnit)
+		m.logger.Info().Msgf("start sub %s ", strUnit)
 
-		t := m.client.Subscribe(m.getTopicSub(strUnit), QOS1, handle)
+		t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, handle)
 		//go func() {
 		_ = t.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
 		if t.Error() != nil {
-			log.Printf("err sub: %s\n", t.Error())
+			m.logger.Info().Msgf("err sub: %s\n", t.Error())
 		} else {
-			log.Printf("subscribed to: %s", strUnit)
+			m.logger.Info().Msgf("subscribed to: %s", strUnit)
+			m.subOk.Store(true) //m.subOk = true
 		}
 		//}()
 	}()
 }
 
-// func (m *Mq) wait_end () {
-// 	sig := make(chan os.Signal, 1)
-// 	signal.Notify(sig, os.Interrupt)
-// 	signal.Notify(sig, syscall.SIGTERM)
-
-// 	<-sig
-// 	log.Printf("signal caught - exiting")
-// 	m.client.Disconnect(1000)
-// 	log.Printf("shutdown complete")
-// }
+func (m *Mq) IsSubOk() bool {
+	//return m.subOk
+	subOk := m.subOk.Load().(bool)
+	return subOk
+}

@@ -2,6 +2,9 @@ package http_mq
 
 import (
 	"back/internal/unit"
+	"back/internal/ws"
+	"back/pkg/config"
+	"back/pkg/logger"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,60 +13,23 @@ import (
 )
 
 type HttpServer struct {
-	units *unit.Units
+	units  *unit.Units
+	logger *logger.Logger
+	hub    *ws.Hub
 }
 
-func GetHttpServer(us *unit.Units) *HttpServer {
-	h := HttpServer{units: us}
-	return &h
+func GetHttpServer(us *unit.Units, logger *logger.Logger, hub *ws.Hub) (*HttpServer, error) {
+	cfg := config.Get()
+	httpHost := cfg.HttpHost
+	h := HttpServer{units: us, logger: logger, hub: hub}
+
+	h.logger.Info().Msgf("Start HTTP %s ", httpHost)
+	err := h.StartHttp(httpHost)
+	if err != nil {
+		return nil, err
+	}
+	return &h, nil
 }
-
-// func (h *HttpServer) StartHttp(addr string) error {
-// 	gin.DisableConsoleColor()
-// 	router := gin.Default()
-// 	router.Use(gin.Logger())
-
-// 	router.GET("/", h.Hello)
-// 	router.GET("/api/units/:ind", h.GetUnit)
-// 	router.GET("/api/units", h.GetUnits)
-// 	router.GET("/user/:name", h.HelloUser)
-// 	err := router.Run(addr)
-// 	return err
-// }
-
-// func (h *HttpServer) Hello(c *gin.Context) {
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"message": "ok",
-// 	})
-// }
-// func (h *HttpServer) HelloUser(c *gin.Context) {
-// 	name := c.Param("name")
-// 	c.String(http.StatusOK, "hello %s ", name)
-// }
-
-// func (h *HttpServer) GetUnit(c *gin.Context) {
-// 	strInd := c.Param("ind")
-// 	ind, err := strconv.Atoi(strInd)
-// 	if err != nil {
-// 		//
-// 		return
-// 	}
-// 	if ind >= h.units.Cnt {
-// 		//
-// 		return
-// 	}
-// 	b, err := h.units.GetJsonUnit(ind)
-// 	if err != nil {
-// 		//
-// 		return
-// 	}
-// 	c.JSON(http.StatusOK, string(b))
-// }
-// func (h *HttpServer) GetUnits(c *gin.Context) {
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"message": "ok",
-// 	})
-// }
 
 func (h *HttpServer) StartHttp(addr string) error {
 	router := httprouter.New()
@@ -71,6 +37,7 @@ func (h *HttpServer) StartHttp(addr string) error {
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
+	router.GET("/ws", h.Ws)
 
 	err := http.ListenAndServe(addr, router)
 	return err
@@ -78,6 +45,11 @@ func (h *HttpServer) StartHttp(addr string) error {
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
+}
+func (h *HttpServer) Ws(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	//fmt.Fprint(w, "Welcome!\n")
+	//ws.ServeWs(h.hub, w, r)
+	h.hub.ServeWs(w, r)
 }
 
 func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {

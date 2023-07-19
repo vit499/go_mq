@@ -1,0 +1,9 @@
+export const ADMIN_ROUTE = "/sett";
+export const SETT_ROUTE = "/sett";
+export const LOGIN_ROUTE = "/login";
+export const REGISTER_ROUTE = "/register";
+export const HOME_ROUTE = "/";
+export const ABOUT_ROUTE = "/about";
+export const R1_ROUTE = "/r1";
+export const R2_ROUTE = "/r2";
+export const R3_ROUTE = "/r3";

@@ -4,40 +4,51 @@ import (
 	"back/internal/http_mq"
 	"back/internal/mq_mq"
 	"back/internal/unit"
+	"back/internal/ws"
+	"back/pkg/config"
+	"back/pkg/logger"
 	"back/pkg/tgbot"
 	"log"
-	"os"
 
 	"github.com/joho/godotenv"
+	//"github.com/pkg/errors"
 )
 
-func main() {
+func run() error {
 	err := godotenv.Load()
 	if err != nil {
 		log.Printf("Error loading .env file")
 	}
-	log.Printf("Starting...")
+	_ = config.Get()
 
-	mq := mq_mq.GetMq(os.Getenv("MQTT_HOST"), os.Getenv("MQTT_USER"), os.Getenv("MQTT_PASS"))
+	l := logger.Get()
+	l.Info().Msg("Starting...")
+
+	tg := tgbot.GetTgbot()
+
+	mq := mq_mq.Get(l)
 	defer mq.Disconnect()
 
-	mq.InitClient()
-	if err := mq.Connect(); err != nil {
-		log.Printf("mqtt connect err: %s ", err)
+	hub := ws.NewHub()
+
+	us := unit.Get(mq, tg, hub, l)
+
+	_, err = http_mq.GetHttpServer(us, l, hub)
+	if err != nil {
+		return err
 	}
-	log.Printf("mq -- ")
 
-	tg := tgbot.GetTgbot(os.Getenv("TOKEN"), os.Getenv("CHAT"))
+	// _, err = ws.GetWsServer(l)
+	// if err != nil {
+	// 	return err
+	// }
 
-	us := unit.GetUnits(mq, tg)
+	return nil
+}
 
-	us.AddUnit("0802")
-	us.AddUnit("0803")
-	us.AddUnit("0804")
+func main() {
 
-	h := http_mq.GetHttpServer(us)
-	httpHost := os.Getenv("HTTP_HOST")
-	log.Printf("Start HTTP %s ", httpHost)
-	log.Fatal(h.StartHttp(httpHost))
-
+	if err := run(); err != nil {
+		log.Fatalf("err: %s", err.Error())
+	}
 }

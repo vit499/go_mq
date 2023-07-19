@@ -1,6 +1,7 @@
 package tgbot
 
 import (
+	"back/pkg/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -15,11 +16,14 @@ import (
 // https://api.telegram.org/botXXXX/getChat?chat_id=@xxxgroup
 
 type Tgbot struct {
-	token string     // := os.Getenv("TOKEN")
-	chat_id string   // := os.Getenv("CHAT")
+	token   string // := os.Getenv("TOKEN")
+	chat_id string // := os.Getenv("CHAT")
 }
 
-func GetTgbot(token string, chat_id string) *Tgbot {
+func GetTgbot() *Tgbot {
+	cfg := config.Get()
+	token := cfg.TgToken
+	chat_id := cfg.TgChat
 	tgbot := Tgbot{token: token, chat_id: chat_id}
 
 	return &tgbot
@@ -62,7 +66,7 @@ func (tg *Tgbot) SendMes(src string) {
 	body := cc1(tg.chat_id, src)
 	//body := cc2(tg.chat_id, src)
 	//body := cc3(tg.chat_id, src)
-  log.Printf("send to tg: %s ", src)
+	log.Printf("send to tg: %s ", src)
 	_, err := http.Post(url, "application/json", body)
 	if err != nil {
 		log.Printf("send bot err: %s", err.Error())
