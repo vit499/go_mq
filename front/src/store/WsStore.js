@@ -1,10 +1,13 @@
 import { makeAutoObservable, runInAction } from "mobx";
+import hostStore from "./HostStore";
 import mq from "./Mq";
+import temperStore from "./TemperStore";
 
 class WsStore {
   //_connectStatus;
   constructor() {
     this._listMessage = [];
+    this.pass = "";
     this.Message = "-";
     this._connectStatus = "Closed";
     this.username = "a";
@@ -30,11 +33,11 @@ class WsStore {
         this._connectStatus = "Connected";
         console.log("connected");
         this.eff = false;
-        //this.sendInfo();
-        if (this.savedMes !== "") {
-          this.sendMessage(this.savedMes);
-          this.savedMes = "";
-        }
+        this.sendInfo();
+        // if (this.savedMes !== "") {
+        //   this.sendMessage(this.savedMes);
+        //   this.savedMes = "";
+        // }
       });
     };
 
@@ -71,27 +74,36 @@ class WsStore {
     };
   }
 
-  sendMessage = async (val) => {
+  WsPublish = async (val) => {
+    const { indObj, payload } = val;
+    temperStore.clear(indObj);
+    const topicPub = mq.formTopicPub(indObj);
+
     if (this._connectStatus !== "Connected") {
-      this.savedMes = val;
+      //this.savedMes = val;
       this.wsConnect();
       return;
     }
-    const message = {
+    const mes = {
       username: this.username,
-      message: val,
-      id: Date.now(),
-      event: "message",
+      topic: topicPub,
+      message: payload,
+      group: "command",
     };
-    this.sock.send(JSON.stringify(message));
+    this.sock.send(JSON.stringify(mes));
   };
   sendInfo = async () => {
-    const message = {
+    // Username: s[0],
+    // Topic:    s[1],
+    // Message:  s[2],
+    // Group:    "mqtt",
+    const mes = {
       username: this.username,
-      id: Date.now(),
-      event: "connection",
+      topic: this.pass,
+      message: "-",
+      group: "connection",
     };
-    this.sock.send(JSON.stringify(message));
+    this.sock.send(JSON.stringify(mes));
   };
 
   Disconnect() {
@@ -109,7 +121,8 @@ class WsStore {
     if (this._connectStatus !== "Closed") {
       return;
     }
-    this.username = Date.now();
+    this.username = hostStore.login; //Date.now();
+    this.pass = hostStore.password;
     //this.url = process.env.REACT_APP_API_URL || "ws://localhost:3015";
     //const url = `ws://localhost:3015`;
     //this.url = process.env.REACT_APP_API_URL || "ws://localhost:8080/ws";

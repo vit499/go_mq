@@ -1,8 +1,10 @@
 package main
 
 import (
+	"back/internal/hglob"
 	"back/internal/http_mq"
 	"back/internal/mq_mq"
+	"back/internal/service/units_service"
 	"back/internal/unit"
 	"back/internal/ws"
 	"back/pkg/config"
@@ -24,24 +26,22 @@ func run() error {
 	l := logger.Get()
 	l.Info().Msg("Starting...")
 
-	tg := tgbot.GetTgbot()
+	hglob := hglob.NewHglob()
 
-	mq := mq_mq.Get(l)
+	tg := tgbot.GetTgbot()
+	us := unit.Get(tg, l)
+
+	service := service.NewUnitsService(us, hglob)
+
+	mq := mq_mq.Get(l, us, hglob)
 	defer mq.Disconnect()
 
-	hub := ws.NewHub()
+	hub := ws.NewHub(service, hglob)
 
-	us := unit.Get(mq, tg, hub, l)
-
-	_, err = http_mq.GetHttpServer(us, l, hub)
+	_, err = http_mq.GetHttpServer(service, l, hub)
 	if err != nil {
 		return err
 	}
-
-	// _, err = ws.GetWsServer(l)
-	// if err != nil {
-	// 	return err
-	// }
 
 	return nil
 }

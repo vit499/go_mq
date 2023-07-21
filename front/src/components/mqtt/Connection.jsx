@@ -7,15 +7,16 @@ const Connection = observer(() => {
   return (
     <div className="mb-2">
       {authStore.isAuth ? (
-        <button className="me-2" onClick={() => mq.mqTryConnect()}>
-          {mq._connectStatus}
-        </button>
+        // <button className="me-2" onClick={() => mq.mqTryConnect()}>
+        //   {mq._connectStatus}
+        // </button>
+        <div></div>
       ) : (
         <p>No auth</p>
       )}
-      {mq._connectStatus === "Connected" && (
+      {/* {mq._connectStatus === "Connected" && (
         <button onClick={() => mq.mqttDisconnect()}>Disconnect</button>
-      )}
+      )} */}
     </div>
   );
 });

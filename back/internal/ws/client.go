@@ -37,6 +37,7 @@ type Client struct {
 
 func (c *Client) readPump() {
 	defer func() {
+		//log.Println("send to <-unregister")
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
@@ -52,8 +53,9 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		log.Println(string(message))
+		log.Printf("rec from ws: %s", string(message))
 		//c.hub.broadcast <- message
+		c.hub.CheckMes(c, message)
 	}
 }
 
@@ -79,7 +81,7 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			log.Printf("send message:%s", string(message))
+			//log.Printf("send message:%s", string(message))
 			w.Write(message)
 
 			if err := w.Close(); err != nil {
@@ -103,6 +105,7 @@ func (hub *Hub) ServeWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	//log.Println("send to <-register")
 	client.hub.register <- client
 
 	go client.writePump()

@@ -6,8 +6,7 @@ import (
 	"strings"
 )
 
-func (u *Unit) FillBuf(topic string, src string) string {
-	ev := ""
+func (u *Unit) FillBuf(topic string, src string) {
 	if topic == "config/fout" {
 		b := utils.Str2Hex(src)
 		u.FillFout(b)
@@ -22,9 +21,13 @@ func (u *Unit) FillBuf(topic string, src string) string {
 		u.FillSout(b)
 	} else if topic == "status/param" {
 		u.FillParam(src)
-	} else if topic == "status/cp" {
-		//u.FillParam(src)
-	} else if topic == "event" {
+	} else if topic == "config/vers" {
+		u.Vers = src
+	}
+}
+func (u *Unit) FillBufEv(topic string, src string) string {
+	ev := ""
+	if topic == "event" {
 		ev = u.RecEvent(src)
 	}
 	return ev

@@ -15,7 +15,8 @@ const SetOutModern = observer(({ indObj, indOut }) => {
   };
   const onSet = () => {
     const mes = `setout${indOut + 1}=${temperOn.toString()}`;
-    mq.mqttPublish({ indObj: indObj, payload: mes });
+    //mq.mqttPublish({ indObj: indObj, payload: mes });
+    wsStore.WsPublish({ indObj: indObj, payload: mes });
   };
   useEffect(() => {
     // для начельной инициализации температуры включения

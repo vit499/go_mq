@@ -1,10 +1,15 @@
 package mq_mq
 
 import (
+	"back/internal/hglob"
+	"back/internal/unit"
 	"back/pkg/config"
 	"back/pkg/logger"
 	"back/pkg/utils"
+	"fmt"
+	"strings"
 	"sync/atomic"
+	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
@@ -17,13 +22,15 @@ type Mq struct {
 	Login     string
 	password  string
 	addr      string
+	us        *unit.Units
 	client    mqtt.Client
 	logger    *logger.Logger
+	hglob     *hglob.Hglob
 	connected atomic.Value
 	subOk     atomic.Value
 }
 
-func Get(logger *logger.Logger) *Mq {
+func Get(logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
 	cfg := config.Get()
 	Login := cfg.MqUser
 	addr := cfg.MqHost
@@ -31,8 +38,10 @@ func Get(logger *logger.Logger) *Mq {
 	m := Mq{
 		Login: Login, addr: addr,
 		password:  password,
+		us:        us,
 		client:    nil,
 		logger:    logger,
+		hglob:     hglob,
 		connected: atomic.Value{},
 		subOk:     atomic.Value{},
 	}
@@ -42,7 +51,8 @@ func Get(logger *logger.Logger) *Mq {
 
 	m.InitClient()
 	go m.Connect()
-
+	go m.WaitToMq()
+	// go m.CheckVers()
 	return &m
 }
 
@@ -59,14 +69,13 @@ func (m *Mq) InitClient() {
 	// Log events
 	opts.OnConnectionLost = func(cl mqtt.Client, err error) {
 		m.logger.Info().Msg("connection lost")
-		//m.subOk = false
 		m.connected.Store(false)
 		m.subOk.Store(false)
 	}
 	opts.OnConnect = func(c mqtt.Client) {
 		m.logger.Info().Msg("connection established")
 		m.connected.Store(true)
-		//m.Sub(c)
+		m.SubAll()
 	}
 	opts.OnReconnecting = func(mqtt.Client, *mqtt.ClientOptions) {
 		m.logger.Info().Msg("attempting to reconnect")
@@ -91,7 +100,7 @@ func (m *Mq) Disconnect() {
 	utils.D_1ms(2)
 }
 
-func (m *Mq) Sub(strUnit string, handle func(_ mqtt.Client, msg mqtt.Message)) {
+func (m *Mq) Sub(strUnit string) {
 	go func() {
 		m.logger.Info().Msgf("sub unit %s, ", strUnit)
 		cnt := 0
@@ -112,7 +121,8 @@ func (m *Mq) Sub(strUnit string, handle func(_ mqtt.Client, msg mqtt.Message)) {
 		}
 		m.logger.Info().Msgf("start sub %s ", strUnit)
 
-		t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, handle)
+		//t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, handle)
+		t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, m.rr)
 		//go func() {
 		_ = t.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
 		if t.Error() != nil {
@@ -125,8 +135,72 @@ func (m *Mq) Sub(strUnit string, handle func(_ mqtt.Client, msg mqtt.Message)) {
 	}()
 }
 
+type RecHandler interface {
+	RecHandle(topic, mes string)
+}
+
+func (m *Mq) recHandle(topic, mes string) {
+	m.us.RecHandle(topic, mes)
+	t := strings.Split(topic, "/")
+	user := t[0]
+	s := []string{user, topic, mes}
+	m.hglob.MqToWs <- s
+}
+
+func (m *Mq) rr(_ mqtt.Client, msg mqtt.Message) {
+	topic := msg.Topic()
+	message := string(msg.Payload())
+	m.recHandle(topic, message)
+}
+
+func (m *Mq) SubAll() {
+	m.logger.Info().Msg("sub all")
+	for i := 0; i < m.us.Cnt; i++ {
+		m.Sub(m.us.Up[i].StrUnit)
+	}
+}
+
 func (m *Mq) IsSubOk() bool {
 	//return m.subOk
 	subOk := m.subOk.Load().(bool)
 	return subOk
+}
+
+func (m *Mq) WaitToMq() {
+	for {
+		select {
+		case msg := <-m.hglob.WsToMq:
+			m.logger.Info().Msgf("to mq topic: %s mes: %s\n", msg[0], msg[1])
+			if m.subOk.Load().(bool) {
+				m.client.Publish(msg[0], QOS1, false, msg[1])
+			}
+			// _ = t.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
+			// if t.Error() != nil {
+			// 	m.logger.Info().Msgf("err pub: %s\n", t.Error())
+			// } else {
+			// 	m.logger.Info().Msgf("publish ok")
+			// }
+		}
+	}
+}
+
+func (m *Mq) CheckVers() {
+
+	for {
+		time.Sleep(30 * time.Second)
+		if m.subOk.Load().(bool) {
+			cnt := m.us.Cnt
+			for i := 0; i < cnt; i++ {
+				vers := m.us.GetUnitVers(i)
+				if vers == "" {
+					topic := fmt.Sprintf("%s/%s/devrec/control", m.Login, m.us.Up[i].StrUnit)
+					message := "reqconfig"
+					m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
+					m.client.Publish(topic, QOS1, false, message)
+				} else {
+					m.logger.Info().Msgf("unit %s vers: %s", m.us.Up[i].StrUnit, vers)
+				}
+			}
+		}
+	}
 }

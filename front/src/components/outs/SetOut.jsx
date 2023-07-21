@@ -2,8 +2,9 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import descrStore from "../../store/DescrStore";
-import mq from "../../store/Mq";
+//import mq from "../../store/Mq";
 import temperStore from "../../store/TemperStore";
+import wsStore from "../../store/WsStore";
 
 const SetOut = observer(({ indObj, indOut }) => {
   const [temperOn, setTemperOn] = useState(0);
@@ -16,7 +17,8 @@ const SetOut = observer(({ indObj, indOut }) => {
   };
   const onSet = () => {
     const mes = `setout${indOut + 1}=${temperOn.toString()}`;
-    mq.mqttPublish({ indObj: indObj, payload: mes });
+    //mq.mqttPublish({ indObj: indObj, payload: mes });
+    wsStore.WsPublish({ indObj: indObj, payload: mes });
   };
   useEffect(() => {
     // для начельной инициализации температуры включения

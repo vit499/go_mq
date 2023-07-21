@@ -19,6 +19,7 @@ type Unit struct {
 	U12v      string `json:"U12v" binding:"required"`
 	LevelGsm  int    `json:"LevelGsm" binding:"required"`
 	LevelWifi int    `json:"LevelWifi" binding:"required"`
+	Vers      string `json:"Vers"`
 }
 
 func (u *Unit) Init(strUnit string) {
@@ -40,6 +41,7 @@ func (u *Unit) Init(strUnit string) {
 	u.U12v = "-"
 	u.LevelGsm = 0
 	u.LevelWifi = 0
+	u.Vers = ""
 }
 
 //	func (u *Unit) FillFout(buf []int) {
