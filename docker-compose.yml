@@ -26,12 +26,14 @@ services:
     build:
       context: ./front
       args:
-        WS_API_URL: ${WS_API_URL}
+        API_URL: ${API_URL}
     container_name: mq_ws_front
     command: serve -s dist -l 31022
     restart: unless-stopped
     ports:
       - "31022:31022"
+    # environment:
+    #   - API_URL=${API_URL}
     logging:
       options:
         max-size: 10m
