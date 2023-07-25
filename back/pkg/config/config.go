@@ -10,19 +10,18 @@ import (
 
 type Config struct {
 	HttpHost string
-	HttpPort string
+	// HttpPort string
 	MqHost   string
-	MqPort   string
+	// MqPort   string
 	MqUser   string
 	MqPass   string
-	PgHost   string
-	PgPort   string
-	PgDb     string
-	PgUser   string
-	PgPass   string
+	// PgHost   string
+	// PgPort   string
+	// PgDb     string
+	// PgUser   string
+	// PgPass   string
 	TgToken  string
 	TgChat   string
-	WsHost   string
 	Units    []string
 }
 
@@ -35,15 +34,12 @@ func Get() *Config {
 
 	once.Do(func() {
 		config.HttpHost = os.Getenv("HTTP_HOST")
-		config.HttpPort = os.Getenv("HTTP_PORT")
 		config.MqHost = os.Getenv("MQTT_HOST")
-		config.MqPort = os.Getenv("MQTT_PORT")
-		config.WsHost = os.Getenv("WS_HOST")
 		config.MqUser = "**"
 		config.MqPass = "**"
-		config.PgHost = os.Getenv("PG_HOST")
-		config.PgPort = os.Getenv("PG_PORT")
-		config.PgDb = os.Getenv("PG_DB")
+		// config.PgHost = os.Getenv("PG_HOST")
+		// config.PgPort = os.Getenv("PG_PORT")
+		// config.PgDb = os.Getenv("PG_DB")
 		config.TgToken = "*"
 		config.TgChat = "*"
 		s := os.Getenv("UNITS")
