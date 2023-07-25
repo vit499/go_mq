@@ -1,19 +1,37 @@
 version: "3"
 
 services:
-  api_go:
+  mq_ws_api:
     build: ./back
-    container_name: api_go
+    container_name: mq_ws_api
     restart: unless-stopped
     ports:
-      - 3100:3100
+      - ${HTTP_PORT}:${HTTP_PORT}
+      # - 31021:31021
     environment:
       - HTTP_HOST=${HTTP_HOST}
       - MQTT_HOST=${MQTT_HOST}
       - MQTT_USER=${MQTT_USER}
       - MQTT_PASS=${MQTT_PASS}
+      - UNITS=${UNITS}
       - TOKEN=${TOKEN}
       - CHAT=${CHAT}
+    logging:
+      options:
+        max-size: 10m
+    networks:
+      - v1-network
+
+  mq_ws_front:
+    build:
+      context: ./front
+      args:
+        WS_API_URL: ${WS_API_URL}
+    container_name: mq_ws_front
+    command: serve -s dist -l 31022
+    restart: unless-stopped
+    ports:
+      - "31022:31022"
     logging:
       options:
         max-size: 10m

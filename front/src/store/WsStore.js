@@ -15,7 +15,6 @@ class WsStore {
     this.sock = null;
     this.url = "";
     this.eff = false;
-    this.url = ""; //process.env.REACT_APP_API_URL || "ws://localhost:8080/ws";
     makeAutoObservable(this, {});
   }
 
@@ -125,10 +124,10 @@ class WsStore {
     }
     this.username = hostStore.login; //Date.now();
     this.pass = hostStore.password;
-    //this.url = process.env.REACT_APP_API_URL || "ws://localhost:3015";
-    //const url = `ws://localhost:3015`;
     //this.url = process.env.REACT_APP_API_URL || "ws://localhost:8080/ws";
-    this.url = "ws://localhost:3100/ws";
+    this.url = process.env.REACT_APP_API_URL;
+    console.log(`url=${this.url}`);
+    this.url = this.url + "/ws";
     console.log(`url=${this.url}`);
     this.wsConnect();
   }
