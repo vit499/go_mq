@@ -89,6 +89,7 @@ class WsStore {
       topic: topicPub,
       message: payload,
       group: "command",
+      pass: this.pass,
     };
     this.sock.send(JSON.stringify(mes));
   };
@@ -99,9 +100,10 @@ class WsStore {
     // Group:    "mqtt",
     const mes = {
       username: this.username,
-      topic: this.pass,
+      topic: "-",
       message: "-",
       group: "connection",
+      pass: this.pass,
     };
     this.sock.send(JSON.stringify(mes));
   };

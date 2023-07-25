@@ -24,6 +24,7 @@ func (u *Unit) FillBuf(topic string, src string) {
 	} else if topic == "config/vers" {
 		u.Vers = src
 	}
+
 }
 func (u *Unit) FillBufEv(topic string, src string) string {
 	ev := ""

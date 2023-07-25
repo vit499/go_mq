@@ -83,3 +83,10 @@ func (u *Unit) FillParam(src string) {
 		}
 	}
 }
+
+func (u *Unit) Fill12v(s string) {
+	u.U12v = s
+}
+func (u *Unit) FillLevelWifi(s int) {
+	u.LevelWifi = s
+}

@@ -122,10 +122,10 @@ class Mq {
     } catch (e) {
       console.log(e);
     }
-    console.log(`username: ${username}, topic: ${topic}, group: ${group}`);
+    //console.log(`username: ${username}, topic: ${topic}, group: ${group}`);
     if (username != hostStore.login) return;
     if (group == "mqtt") {
-      this.ReceiveMes(topic, message);
+      //this.ReceiveMes(topic, message);
     } else if (group == "json") {
       runInAction(() => {
         temperStore.recMesJson(topic, message);

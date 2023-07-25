@@ -40,6 +40,11 @@ const SetOut = observer(({ indObj, indOut }) => {
           {temperStore._nvobj[indObj].valid && (
             <>
               <div className="mb-2">
+                {!temperStore._nvobj[indObj].online && (
+                  <div style={{ backgroundColor: "#dddddd" }}>
+                    {`не на связи`}
+                  </div>
+                )}
                 {temperStore._nvobj[indObj].sout[indOut] !== 0 ? (
                   <div
                     style={{ backgroundColor: "pink" }}

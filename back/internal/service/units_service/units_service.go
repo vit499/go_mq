@@ -3,6 +3,7 @@ package service
 import (
 	"back/internal/hglob"
 	"back/internal/unit"
+	"errors"
 	"fmt"
 	"strconv"
 )
@@ -97,4 +98,17 @@ func (h *UnitsService) GetUnitByInd(ind int, user string) ([]string, error) {
 	}
 	s := []string{user, topic, string(b)}
 	return s, nil
+}
+
+func (h *UnitsService) GetUnitByName(strUnit string, user string) ([]string, error) {
+	for i := 0; i < h.units.Cnt; i++ {
+		if h.units.Up[i].StrUnit == strUnit {
+			return h.GetUnitByInd(i, user)
+		}
+	}
+	return nil, errors.New("not found")
+}
+
+func (h *UnitsService) CheckPass(pass string) bool {
+	return h.units.CheckPass(pass)
 }

@@ -14,6 +14,7 @@ class DevSend {
         sout: [],
         indtemp: [],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
       {
@@ -23,6 +24,7 @@ class DevSend {
         sout: [],
         indtemp: [],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
       {
@@ -32,6 +34,7 @@ class DevSend {
         sout: [],
         indtemp: [],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
     ];
@@ -47,6 +50,7 @@ class DevSend {
     this._nvobj[indObj].sout = [];
     this._nvobj[indObj].indtemp = [];
     this._nvobj[indObj].temper = [0x80, 0x80, 0x80];
+    this._nvobj[indObj].online = false;
     this._nvobj[indObj].valid = false;
   }
   clearAll() {
@@ -56,6 +60,7 @@ class DevSend {
       o.sout = [];
       o.indtemp = [];
       o.temper = [0x80, 0x80, 0x80];
+      o.online = false;
       o.valid = false;
     });
   }
@@ -140,6 +145,7 @@ class DevSend {
       // console.log("arrStr", JSON.stringify(arrStr, null, 2));
     }
 
+    obj.online = true;
     let valid = true;
     if (obj.fout.length === 0) valid = false;
     if (obj.ftout.length === 0) valid = false;
@@ -150,7 +156,7 @@ class DevSend {
   }
 
   log1(obj) {
-    console.log(`${obj.nobj} =`, JSON.stringify(obj, null, 2));
+    //console.log(`${obj.nobj} =`, JSON.stringify(obj, null, 2));
   }
 
   /*
@@ -197,7 +203,7 @@ src={
     if (!obj) return null;
     const src = JSON.parse(mes);
 
-    console.log(`src=${JSON.stringify(src, null, 2)}`);
+    //console.log(`src=${JSON.stringify(src, null, 2)}`);
 
     const Fout = src.Fout;
     if (Fout != null) {
@@ -207,7 +213,7 @@ src={
     }
 
     const Sout = src.Sout;
-    console.log(`Sout=${JSON.stringify(Sout, null, 2)}`);
+    //console.log(`Sout=${JSON.stringify(Sout, null, 2)}`);
     if (Sout != null) {
       Sout.forEach((v, i) => {
         if (i < 4) obj.sout[i] = v;
@@ -235,9 +241,14 @@ src={
       });
     }
 
-    this.dv12v = src.U12v;
-    this.LevelGsm = src.LevelGsm;
-    this.LevelWifi = src.LevelWifi;
+    // this.dv12v = src.U12v;
+    // this.LevelGsm = src.LevelGsm;
+    // this.LevelWifi = src.LevelWifi;
+    // this.Online = src.Online;
+    obj.dv12v = src.U12v;
+    obj.LevelGsm = src.LevelGsm;
+    obj.LevelWifi = src.LevelWifi;
+    obj.online = src.Online;
 
     let valid = true;
     if (obj.fout.length === 0) valid = false;

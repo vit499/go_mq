@@ -4,6 +4,8 @@ import (
 	"back/pkg/utils"
 	"encoding/json"
 	"log"
+	"sync"
+	"time"
 )
 
 const NUMBER_OUTS = 4
@@ -20,6 +22,9 @@ type Unit struct {
 	LevelGsm  int    `json:"LevelGsm" binding:"required"`
 	LevelWifi int    `json:"LevelWifi" binding:"required"`
 	Vers      string `json:"Vers"`
+	Online    bool   `json:"Online"`
+	cnt       int
+	mutex     sync.Mutex
 }
 
 func (u *Unit) Init(strUnit string) {
@@ -42,71 +47,10 @@ func (u *Unit) Init(strUnit string) {
 	u.LevelGsm = 0
 	u.LevelWifi = 0
 	u.Vers = ""
-}
-
-//	func (u *Unit) FillFout(buf []int) {
-//		len_src := len(buf)
-//		if len_src > NUMBER_OUTS {
-//			//log.Printf("len=%d", len_src)
-//			len_src = NUMBER_OUTS
-//		}
-//		for i := 0; i < len_src; i++ {
-//			u.Fout[i] = buf[i]
-//		}
-//	}
-//
-//	func (u *Unit) FillFtout(buf []int) {
-//		len_src := len(buf)
-//		if len_src > NUMBER_OUTS {
-//			//log.Printf("len=%d", len_src)
-//			len_src = NUMBER_OUTS
-//		}
-//		for i := 0; i < len_src; i++ {
-//			u.Ftout[i] = buf[i]
-//		}
-//	}
-//
-//	func (u *Unit) FillSout(buf []int) {
-//		len_src := len(buf)
-//		if len_src > NUMBER_OUTS {
-//			//.Printf("len=%d", len_src)
-//			len_src = NUMBER_OUTS
-//		}
-//		for i := 0; i < len_src; i++ {
-//			u.Sout[i] = buf[i]
-//		}
-//	}
-//
-//	func (u *Unit) FillIndTemper(buf []int) {
-//		len_src := len(buf)
-//		if len_src > NUMBER_OUTS {
-//			//log.Printf("len=%d", len_src)
-//			len_src = NUMBER_OUTS
-//		}
-//		for i := 0; i < len_src; i++ {
-//			u.IndTemper[i] = buf[i]
-//		}
-//	}
-//
-//	func (u *Unit) FillTemper(buf []int) {
-//		len_src := len(buf)
-//		if len_src > NUMBER_TEMPER {
-//			//log.Printf("len=%d", len_src)
-//			len_src = NUMBER_TEMPER
-//		}
-//		for i := 0; i < len_src; i++ {
-//			c := buf[i] & 0xff
-//			if c != 0x80 && (c&(1<<7)) != 0 {
-//				c = c - 256
-//			}
-//			u.Temper[i] = c
-//		}
-//	}
-func (u *Unit) Fill12v(s string) {
-	u.U12v = s
-}
-func (u *Unit) FillLevelWifi(s int) {
-	u.LevelWifi = s
+	u.Online = false
+	u.cnt = 0
+	u.mutex = sync.Mutex{}
+	go u.checkOnline()
 }
 
 func (u *Unit) PrintUnit() {
@@ -135,5 +79,26 @@ func (u *Unit) PrintUnit() {
 	}
 	if u.Temper[1] != 0x80 {
 		log.Printf("T2=%d", u.Temper[1])
+	}
+}
+
+func (u *Unit) SetOnline(v bool) {
+	//log.Printf("online %s %t", u.StrUnit, v)
+	u.mutex.Lock()
+	u.Online = v
+	u.cnt = 0
+	u.mutex.Unlock()
+}
+func (u *Unit) checkOnline() {
+	for {
+		time.Sleep(60 * time.Second)
+		u.mutex.Lock()
+		if u.Online {
+			u.cnt++
+			if u.cnt >= 10 {
+				u.Online = false
+			}
+		}
+		u.mutex.Unlock()
 	}
 }

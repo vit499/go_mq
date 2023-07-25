@@ -24,15 +24,17 @@ type Units struct {
 	Tg *tgbot.Tgbot
 	//hub    *ws.Hub
 	logger *logger.Logger
+	pass   string
 }
 
 func Get(tg *tgbot.Tgbot, logger *logger.Logger) *Units {
 	cfg := config.Get()
 	arr := cfg.Units
+	pass := cfg.MqPass
 
 	up1 := make([]*Unit, 10)
 	//us := Units{up1, 0, mq, tg, hub, logger}
-	us := Units{up1, 0, tg, logger}
+	us := Units{up1, 0, tg, logger, pass}
 	for i := 0; i < len(arr); i++ {
 		us.AddOneUnit(arr[i])
 	}
@@ -84,6 +86,14 @@ func (us *Units) AddOneUnit(s string) {
 // 	}
 // }
 
+func (us *Units) CheckPass(p string) bool {
+	if us.pass != p {
+		us.logger.Info().Msgf("check pass %s mq=%s", p, us.pass)
+		return false
+	}
+	return true
+}
+
 func (us *Units) getIndUnit(s string) int {
 	r := 100
 	for i := 0; i < us.Cnt; i++ {
@@ -103,6 +113,7 @@ func (us *Units) FillBuf(topic string, mes string) {
 	}
 	topic = strings.Join(t[3:], "/")
 	//log.Printf("topic= %s, msg= %s ", topic, mes)
+	us.Up[indUnit].SetOnline(true)
 	us.Up[indUnit].FillBuf(topic, mes)
 	mesEvent := us.Up[indUnit].FillBufEv(topic, mes)
 	//us.Up[indUnit].PrintUnit()

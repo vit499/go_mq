@@ -18,6 +18,7 @@ class TemperStore {
         sout: [0, 0, 0, 0],
         indtemp: [0, 0, 0, 0],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
       {
@@ -28,6 +29,7 @@ class TemperStore {
         sout: [0, 0, 0, 0],
         indtemp: [0, 0, 0, 0],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
       {
@@ -38,6 +40,7 @@ class TemperStore {
         sout: [0, 0, 0, 0],
         indtemp: [0, 0, 0, 0],
         temper: [0x80, 0x80, 0x80],
+        online: false,
         valid: false,
       },
     ];
@@ -57,6 +60,7 @@ class TemperStore {
       this._nvobj[indObj].sout = [0, 0, 0, 0];
       this._nvobj[indObj].indtemp = [0, 0, 0, 0];
       this._nvobj[indObj].temper = [0x80, 0x80, 0x80];
+      this._nvobj[indObj].online = false;
       this._nvobj[indObj].valid = false;
     });
   }
@@ -69,6 +73,7 @@ class TemperStore {
         o.sout = [0, 0, 0, 0];
         o.indtemp = [0, 0, 0, 0];
         o.temper = [0x80, 0x80, 0x80];
+        o.online = false;
         o.valid = false;
       });
     });
@@ -135,7 +140,9 @@ class TemperStore {
           this._nvobj[ind].temper[i] = t;
         }
       });
+      this._nvobj[ind].online = obj.online;
       this._nvobj[ind].valid = obj.valid;
+      //console.log(`online${ind}=${this._nvobj[ind].online}`);
       //console.log(`valid${ind}=${this._nvobj[ind].valid}`);
     });
   }
