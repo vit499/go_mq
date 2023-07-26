@@ -107,7 +107,7 @@ func (us *Units) FillBuf(topic string, mes string) {
 	mesEvent := us.Up[indUnit].FillBufEv(topic, mes)
 	//us.Up[indUnit].PrintUnit()
 	if mesEvent != "" {
-		//us.Tg.SendMes(mesEvent)
+		us.Tg.SendMes(mesEvent)
 	}
 }
 
