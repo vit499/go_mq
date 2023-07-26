@@ -52,7 +52,7 @@ func Get(logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
 	m.InitClient()
 	go m.Connect()
 	go m.WaitToMq()
-	// go m.CheckVers()
+	go m.CheckVers()
 	return &m
 }
 

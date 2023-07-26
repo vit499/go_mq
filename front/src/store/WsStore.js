@@ -133,7 +133,7 @@ class WsStore {
       // this.url = "ws://mq_ws_api"
     }
     console.log(`url=${this.url}`);
-    this.url = this.url + "/ws";
+    this.url = this.url + "/api/ws";
     console.log(`url=${this.url}`);
     this.wsConnect();
   }
