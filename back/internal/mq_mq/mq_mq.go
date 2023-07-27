@@ -6,6 +6,7 @@ import (
 	"back/pkg/config"
 	"back/pkg/logger"
 	"back/pkg/utils"
+	"context"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -30,7 +31,7 @@ type Mq struct {
 	subOk     atomic.Value
 }
 
-func Get(logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
+func Get(ctx context.Context, logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
 	cfg := config.Get()
 	Login := cfg.MqUser
 	addr := cfg.MqHost
@@ -51,8 +52,8 @@ func Get(logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
 
 	m.InitClient()
 	go m.Connect()
-	go m.WaitToMq()
-	go m.CheckVers()
+	go m.WaitToMq(ctx)
+	go m.CheckVers(ctx)
 	return &m
 }
 
@@ -166,9 +167,12 @@ func (m *Mq) IsSubOk() bool {
 	return subOk
 }
 
-func (m *Mq) WaitToMq() {
+func (m *Mq) WaitToMq(ctx context.Context) {
 	for {
 		select {
+		case <-ctx.Done():
+			m.logger.Info().Msg("ctx done mq.WaitToMq")
+			return
 		case msg := <-m.hglob.WsToMq:
 			m.logger.Info().Msgf("to mq topic: %s mes: %s\n", msg[0], msg[1])
 			if m.subOk.Load().(bool) {
@@ -184,23 +188,31 @@ func (m *Mq) WaitToMq() {
 	}
 }
 
-func (m *Mq) CheckVers() {
+func (m *Mq) CheckVers(ctx context.Context) {
 
 	for {
-		time.Sleep(30 * time.Second)
-		if m.subOk.Load().(bool) {
-			cnt := m.us.Cnt
-			for i := 0; i < cnt; i++ {
-				vers := m.us.GetUnitVers(i)
-				if vers == "" {
-					topic := fmt.Sprintf("%s/%s/devrec/control", m.Login, m.us.Up[i].StrUnit)
-					message := "reqconfig"
-					m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
-					m.client.Publish(topic, QOS1, false, message)
-				} else {
-					m.logger.Info().Msgf("unit %s vers: %s", m.us.Up[i].StrUnit, vers)
+		//time.Sleep(30 * time.Second)
+		ticker := time.NewTicker(30 * time.Second)
+		select {
+		case <-ctx.Done():
+			m.logger.Info().Msg("ctx done mq.CheckVers")
+			return
+		case <-ticker.C:
+			if m.subOk.Load().(bool) {
+				cnt := m.us.Cnt
+				for i := 0; i < cnt; i++ {
+					vers := m.us.GetUnitVers(i)
+					if vers == "" {
+						topic := fmt.Sprintf("%s/%s/devrec/control", m.Login, m.us.Up[i].StrUnit)
+						message := "reqconfig"
+						m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
+						m.client.Publish(topic, QOS1, false, message)
+					} else {
+						m.logger.Info().Msgf("unit %s vers: %s", m.us.Up[i].StrUnit, vers)
+					}
 				}
 			}
 		}
+
 	}
 }

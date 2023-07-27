@@ -2,6 +2,7 @@ package unit
 
 import (
 	"back/pkg/utils"
+	"context"
 	"encoding/json"
 	"log"
 	"sync"
@@ -50,7 +51,21 @@ func (u *Unit) Init(strUnit string) {
 	u.Online = false
 	u.cnt = 0
 	u.mutex = sync.Mutex{}
-	go u.checkOnline()
+	//go u.checkOnline()
+}
+
+func (u *Unit) CheckingOnline(ctx context.Context) {
+	go u.checkOnline(ctx)
+	// ticker := time.NewTicker(1 * time.Second)
+	// defer ticker.Stop()
+	// for {
+	// 	select {
+	// 	case <-ctx.Done():
+	// 		return
+	// 	case <-ticker.C:
+	// 		u.checkOnline()
+	// 	}
+	// }
 }
 
 func (u *Unit) PrintUnit() {
@@ -89,16 +104,31 @@ func (u *Unit) SetOnline(v bool) {
 	u.cnt = 0
 	u.mutex.Unlock()
 }
-func (u *Unit) checkOnline() {
+func (u *Unit) checkOnline(ctx context.Context) {
 	for {
-		time.Sleep(60 * time.Second)
-		u.mutex.Lock()
-		if u.Online {
-			u.cnt++
-			if u.cnt >= 10 {
-				u.Online = false
+		ticker := time.NewTicker(60 * time.Second)
+		select {
+		case <-ctx.Done():
+			log.Printf("ctx done checkOnline")
+			return
+		case <-ticker.C:
+			u.mutex.Lock()
+			if u.Online {
+				u.cnt++
+				if u.cnt >= 10 {
+					u.Online = false
+				}
 			}
+			u.mutex.Unlock()
 		}
-		u.mutex.Unlock()
+		// time.Sleep(60 * time.Second)
+		// u.mutex.Lock()
+		// if u.Online {
+		// 	u.cnt++
+		// 	if u.cnt >= 10 {
+		// 		u.Online = false
+		// 	}
+		// }
+		// u.mutex.Unlock()
 	}
 }

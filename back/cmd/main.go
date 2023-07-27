@@ -10,7 +10,9 @@ import (
 	"back/pkg/config"
 	"back/pkg/logger"
 	"back/pkg/tgbot"
+	"context"
 	"log"
+	"time"
 
 	"github.com/joho/godotenv"
 	//"github.com/pkg/errors"
@@ -26,17 +28,25 @@ func run() error {
 	l := logger.Get()
 	l.Info().Msg("Starting...")
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer func() {
+		l.Info().Msg("Stopping...")
+		cancel()
+		time.Sleep(10 * time.Millisecond)
+		l.Info().Msg("Stopped.")
+	}()
+
 	hglob := hglob.NewHglob()
 
 	tg := tgbot.GetTgbot()
-	us := unit.Get(tg, l)
+	us := unit.Get(ctx, tg, l)
 
 	service := service.NewUnitsService(us, hglob)
 
-	mq := mq_mq.Get(l, us, hglob)
+	mq := mq_mq.Get(ctx, l, us, hglob)
 	defer mq.Disconnect()
 
-	hub := ws.NewHub(service, hglob)
+	hub := ws.NewHub(ctx, service, hglob)
 
 	_, err = http_mq.GetHttpServer(service, l, hub)
 	if err != nil {

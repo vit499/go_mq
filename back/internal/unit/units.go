@@ -6,6 +6,8 @@ import (
 	"back/pkg/config"
 	"back/pkg/logger"
 	"back/pkg/tgbot"
+	"context"
+
 	// "time"
 
 	//"back/pkg/utils"
@@ -27,7 +29,7 @@ type Units struct {
 	pass   string
 }
 
-func Get(tg *tgbot.Tgbot, logger *logger.Logger) *Units {
+func Get(ctx context.Context, tg *tgbot.Tgbot, logger *logger.Logger) *Units {
 	cfg := config.Get()
 	arr := cfg.Units
 	pass := cfg.MqPass
@@ -36,7 +38,7 @@ func Get(tg *tgbot.Tgbot, logger *logger.Logger) *Units {
 	//us := Units{up1, 0, mq, tg, hub, logger}
 	us := Units{up1, 0, tg, logger, pass}
 	for i := 0; i < len(arr); i++ {
-		us.AddOneUnit(arr[i])
+		us.AddOneUnit(ctx, arr[i])
 	}
 	//us.Sub()
 	//go us.KeepAlive()
@@ -44,18 +46,14 @@ func Get(tg *tgbot.Tgbot, logger *logger.Logger) *Units {
 	return &us
 }
 
-//	func GetUnits(mq *mq_mq.Mq, tg *tgbot.Tgbot) *Units {
-//		up1 := make([]*Unit, 10)
-//		us := Units{up1, 0, mq, tg}
-//		return &us
-//	}
-func (us *Units) AddOneUnit(s string) {
+func (us *Units) AddOneUnit(ctx context.Context, s string) {
 	if us.Cnt < 10 {
 		ind := us.Cnt
 		u := Unit{}
 		u.Init(s)
 		us.Up[ind] = &u
 		us.Cnt = us.Cnt + 1
+		us.Up[ind].CheckingOnline(ctx)
 	}
 }
 

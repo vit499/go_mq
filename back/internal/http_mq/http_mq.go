@@ -8,6 +8,7 @@ import (
 	"back/pkg/logger"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -73,7 +74,11 @@ func (h *HttpServer) GetUnit(w http.ResponseWriter, r *http.Request, ps httprout
 }
 
 func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
+	t := time.Now()
+	defer func() {
+		t1 := time.Since(t)
+		h.logger.Info().Msgf("/api/t time: %v", t1)
+	}()
 	b, err := h.service.GetUnitTemper()
 	if err != nil {
 		//
@@ -85,4 +90,5 @@ func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps ht
 	// header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
+
 }
