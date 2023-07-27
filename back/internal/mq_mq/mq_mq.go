@@ -207,8 +207,6 @@ func (m *Mq) CheckVers(ctx context.Context) {
 						message := "reqconfig"
 						m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
 						m.client.Publish(topic, QOS1, false, message)
-					} else {
-						m.logger.Info().Msgf("unit %s vers: %s", m.us.Up[i].StrUnit, vers)
 					}
 				}
 			}
