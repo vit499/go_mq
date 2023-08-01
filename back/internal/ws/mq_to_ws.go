@@ -131,6 +131,7 @@ func (h *Hub) CheckMes(client *Client, b []byte) {
 	pass := wsMes.Pass
 	if group == "connection" {
 		cnt := h.service.GetCountUnits()
+		time.Sleep(2 * time.Second)
 		for i := 0; i < cnt; i++ {
 			s, err := h.service.GetUnitByInd(i, user)
 			if err != nil {
@@ -143,7 +144,6 @@ func (h *Hub) CheckMes(client *Client, b []byte) {
 				return
 			}
 
-			time.Sleep(2 * time.Second)
 			//log.Printf("SendToWsJson <-client.send ")
 			select {
 			case client.send <- bytesMes:
