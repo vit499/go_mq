@@ -109,7 +109,7 @@ func (u *Unit) checkOnline(ctx context.Context) {
 		ticker := time.NewTicker(60 * time.Second)
 		select {
 		case <-ctx.Done():
-			log.Printf("ctx done checkOnline")
+			// log.Printf("ctx done checkOnline")
 			return
 		case <-ticker.C:
 			u.mutex.Lock()

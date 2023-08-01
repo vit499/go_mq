@@ -6,11 +6,11 @@ import (
 	"back/internal/ws"
 	"back/pkg/config"
 	"back/pkg/logger"
+	"context"
 	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"time"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 type HttpServer struct {
@@ -20,30 +20,61 @@ type HttpServer struct {
 	hub     *ws.Hub
 }
 
-func GetHttpServer(service *service.UnitsService, logger *logger.Logger, hub *ws.Hub) (*HttpServer, error) {
+func GetHttpServer(ctx context.Context, service *service.UnitsService, logger *logger.Logger, hub *ws.Hub) error {
 	cfg := config.Get()
 	httpHost := cfg.HttpHost
 	h := HttpServer{service, logger, hub}
 
-	h.logger.Info().Msgf("Start HTTP %s ", httpHost)
-	err := h.StartHttp(httpHost)
-	if err != nil {
-		return nil, err
-	}
-	return &h, nil
-}
+	// mux := http.NewServeMux()
+	// srv := &http.Server{
+	// 	Addr:    httpHost,
+	// 	Handler: mux,
+	// }
 
-func (h *HttpServer) StartHttp(addr string) error {
+	//h.logger.Info().Msgf("Start HTTP %s ", httpHost)
+
 	router := httprouter.New()
 	router.GET("/", Index)
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
 	router.GET("/ws", h.Ws)
+	srv := &http.Server{Addr: httpHost, Handler: router}
 
-	err := http.ListenAndServe(addr, router)
-	return err
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			h.logger.Error().Msgf("listen %s", err.Error())
+		}
+	}()
+
+	h.logger.Info().Msgf("Start HTTP %s ", httpHost)
+	<-ctx.Done()
+
+	//h.logger.Info().Msg("ctx done http ")
+
+	anotherCtx, cancel := context.WithTimeout(context.Background(), 2*time.Millisecond)
+	defer cancel()
+
+	if err := srv.Shutdown(anotherCtx); err != nil {
+		h.logger.Error().Msgf("Server shutdown: %v", err)
+	}
+	<-anotherCtx.Done()
+
+	h.logger.Info().Msg("Stop HTTP ")
+	return nil
 }
+
+// func (h *HttpServer) StartHttp(addr string) error {
+// 	router := httprouter.New()
+// 	router.GET("/", Index)
+// 	router.GET("/hello/:name", Hello)
+// 	router.GET("/api/units/:ind", h.GetUnit)
+// 	router.GET("/api/t", h.GetUnitTemper)
+// 	router.GET("/ws", h.Ws)
+
+// 	err := http.ListenAndServe(addr, router)
+// 	return err
+// }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")

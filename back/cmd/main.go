@@ -12,6 +12,8 @@ import (
 	"back/pkg/tgbot"
 	"context"
 	"log"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -21,7 +23,7 @@ import (
 func run() error {
 	err := godotenv.Load()
 	if err != nil {
-		log.Printf("Error loading .env file")
+		//log.Printf("Error loading .env file")
 	}
 	_ = config.Get()
 
@@ -30,10 +32,11 @@ func run() error {
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer func() {
-		l.Info().Msg("Stopping...")
+		//l.Info().Msg("Stopping...")
 		cancel()
-		time.Sleep(10 * time.Millisecond)
-		l.Info().Msg("Stopped.")
+		time.Sleep(50 * time.Millisecond)
+		//time.Sleep(2 * time.Second)
+		//l.Info().Msg("Stopped.")
 	}()
 
 	hglob := hglob.NewHglob()
@@ -43,20 +46,29 @@ func run() error {
 
 	service := service.NewUnitsService(us, hglob)
 
-	mq := mq_mq.Get(ctx, l, us, hglob)
-	defer mq.Disconnect()
-
-	hub := ws.NewHub(ctx, service, hglob)
-
-	_, err = http_mq.GetHttpServer(service, l, hub)
+	err = mq_mq.Get(ctx, l, us, hglob)
 	if err != nil {
 		return err
 	}
+
+	hub := ws.NewHub(ctx, service, hglob)
+
+	go func() {
+		err := http_mq.GetHttpServer(ctx, service, l, hub)
+		if err != nil {
+			l.Error().Msg(err.Error())
+		}
+	}()
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	<-sigint
 
 	return nil
 }
 
 func main() {
+	// ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	// defer stop()
 
 	if err := run(); err != nil {
 		log.Fatalf("err: %s", err.Error())

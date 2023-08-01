@@ -4,8 +4,6 @@ import (
 	"back/internal/hglob"
 	"back/internal/service/units_service"
 	"context"
-	"log"
-	//"log"
 )
 
 // "bytes"
@@ -43,7 +41,7 @@ func (h *Hub) Run(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("ctx done hub.Run")
+			// log.Println("ctx done hub.Run")
 			return
 		case client := <-h.register:
 			//log.Println("rec from <-register")

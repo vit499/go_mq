@@ -127,13 +127,13 @@ class WsStore {
     //this.url = process.env.REACT_APP_API_URL || "ws://localhost:8080/ws";
     // this.url = process.env.REACT_APP_API_URL;
     this.url = import.meta.env.VITE_API_URL;
-    if(!this.url || this.url === "") {
+    if (!this.url || this.url === "") {
       console.log("url not defined");
-      this.url = "ws://192.168.88.225:31021"
+      this.url = "ws://192.168.88.225:31021";
       // this.url = "ws://mq_ws_api"
     }
     console.log(`url=${this.url}`);
-    this.url = this.url + "/api/ws";
+    this.url = this.url + "/ws";
     console.log(`url=${this.url}`);
     this.wsConnect();
   }

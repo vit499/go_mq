@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import devSend from "../utils/devsend";
+import wsStore from "../store/WsStore";
 
 // const nvobj = {
 //   fout: [0, 0, 0, 0],
@@ -20,6 +21,7 @@ class TemperStore {
         temper: [0x80, 0x80, 0x80],
         online: false,
         valid: false,
+        ftout_copy: [0, 0, 0, 0],
       },
       {
         ind: 1,
@@ -31,6 +33,7 @@ class TemperStore {
         temper: [0x80, 0x80, 0x80],
         online: false,
         valid: false,
+        ftout_copy: [0, 0, 0, 0],
       },
       {
         ind: 2,
@@ -42,11 +45,31 @@ class TemperStore {
         temper: [0x80, 0x80, 0x80],
         online: false,
         valid: false,
+        ftout_copy: [0, 0, 0, 0],
       },
     ];
     makeAutoObservable(this, {});
   }
 
+  plusFtoutCopy(indObj, indOut) {
+    let t = this._nvobj[indObj].ftout_copy[indOut];
+    t = t + 1;
+    runInAction(() => {
+      this._nvobj[indObj].ftout_copy[indOut] = t;
+    });
+  }
+  minusFtoutCopy(indObj, indOut) {
+    let t = this._nvobj[indObj].ftout_copy[indOut];
+    t = t - 1;
+    runInAction(() => {
+      this._nvobj[indObj].ftout_copy[indOut] = t;
+    });
+  }
+  SetFtout(indObj, indOut) {
+    let t = this._nvobj[indObj].ftout_copy[indOut];
+    const mes = `setout${indOut + 1}=${t}`;
+    wsStore.WsPublish({ indObj: indObj, payload: mes });
+  }
   fillNobj(ind, nobj) {
     if (ind < 3) this._nvobj[ind].nobj = nobj;
     devSend.fillNobj(ind, nobj);
@@ -62,6 +85,7 @@ class TemperStore {
       this._nvobj[indObj].temper = [0x80, 0x80, 0x80];
       this._nvobj[indObj].online = false;
       this._nvobj[indObj].valid = false;
+      this._nvobj[indObj].ftout_copy = [0, 0, 0, 0];
     });
   }
   clearAll() {
@@ -75,6 +99,7 @@ class TemperStore {
         o.temper = [0x80, 0x80, 0x80];
         o.online = false;
         o.valid = false;
+        o.ftout_copy = [0, 0, 0, 0];
       });
     });
   }
@@ -119,6 +144,7 @@ class TemperStore {
         obj.ftout.forEach((f, i) => {
           //console.log(`${o.nobj} ftout${i + 1}=${o.ftout[i].toString()}`);
           this._nvobj[ind].ftout[i] = obj.ftout[i];
+          this._nvobj[ind].ftout_copy[i] = obj.ftout[i];
         });
       if (obj.sout.length !== 0)
         obj.sout.forEach((f, i) => {

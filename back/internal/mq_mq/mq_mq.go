@@ -7,6 +7,7 @@ import (
 	"back/pkg/logger"
 	"back/pkg/utils"
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"sync/atomic"
@@ -31,11 +32,14 @@ type Mq struct {
 	subOk     atomic.Value
 }
 
-func Get(ctx context.Context, logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) *Mq {
+func Get(ctx context.Context, logger *logger.Logger, us *unit.Units, hglob *hglob.Hglob) error {
 	cfg := config.Get()
 	Login := cfg.MqUser
 	addr := cfg.MqHost
 	password := cfg.MqPass
+	if password == "" {
+		return errors.New("password is empty")
+	}
 	m := Mq{
 		Login: Login, addr: addr,
 		password:  password,
@@ -54,7 +58,8 @@ func Get(ctx context.Context, logger *logger.Logger, us *unit.Units, hglob *hglo
 	go m.Connect()
 	go m.WaitToMq(ctx)
 	go m.CheckVers(ctx)
-	return &m
+	go m.Disconnect(ctx)
+	return nil
 }
 
 func (m *Mq) InitClient() {
@@ -69,41 +74,44 @@ func (m *Mq) InitClient() {
 
 	// Log events
 	opts.OnConnectionLost = func(cl mqtt.Client, err error) {
-		m.logger.Info().Msg("connection lost")
+		m.logger.Info().Msg("mq connection lost")
 		m.connected.Store(false)
 		m.subOk.Store(false)
 	}
 	opts.OnConnect = func(c mqtt.Client) {
-		m.logger.Info().Msg("connection established")
+		m.logger.Info().Msg("mq connected")
 		m.connected.Store(true)
 		m.SubAll()
 	}
 	opts.OnReconnecting = func(mqtt.Client, *mqtt.ClientOptions) {
-		m.logger.Info().Msg("attempting to reconnect")
+		m.logger.Info().Msg("mq reconnecting")
 	}
 	m.client = mqtt.NewClient(opts)
 }
 
 func (m *Mq) Connect() {
-	m.logger.Info().Msg("mqtt start connection ... ")
+	//m.logger.Info().Msg("mqtt start connection ... ")
 	if token := m.client.Connect(); token.Wait() && token.Error() != nil {
 		//return token.Error()
 		//return errors.Wrap(token.Error(), "mqtt connect fail")
 		m.logger.Info().Msgf("mqtt connect fail %s", token.Error())
 	}
-	m.logger.Info().Msg("mqtt ...")
+	//m.logger.Info().Msg("mqtt ...")
 }
-func (m *Mq) Disconnect() {
-	m.logger.Info().Msg("mqtt disconnect")
+
+func (m *Mq) Disconnect(ctx context.Context) {
+	<-ctx.Done()
+	//m.logger.Info().Msg("ctx done mq.Disconnect")
 	if m.client != nil {
 		m.client.Disconnect(1000)
 	}
-	utils.D_1ms(2)
+	time.Sleep(2 * time.Millisecond)
+	m.logger.Info().Msg("mq disconnected")
 }
 
 func (m *Mq) Sub(strUnit string) {
 	go func() {
-		m.logger.Info().Msgf("sub unit %s, ", strUnit)
+		//m.logger.Info().Msgf("sub unit %s ", strUnit)
 		cnt := 0
 		if m.client == nil {
 			m.logger.Info().Msg(" no client ")
@@ -120,7 +128,7 @@ func (m *Mq) Sub(strUnit string) {
 				return
 			}
 		}
-		m.logger.Info().Msgf("start sub %s ", strUnit)
+		//m.logger.Info().Msgf("start sub %s ", strUnit)
 
 		//t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, handle)
 		t := m.client.Subscribe(utils.GetTopicSub(m.Login, strUnit), QOS1, m.rr)
@@ -155,7 +163,7 @@ func (m *Mq) rr(_ mqtt.Client, msg mqtt.Message) {
 }
 
 func (m *Mq) SubAll() {
-	m.logger.Info().Msg("sub all")
+	//m.logger.Info().Msg("sub all")
 	for i := 0; i < m.us.Cnt; i++ {
 		m.Sub(m.us.Up[i].StrUnit)
 	}
@@ -171,7 +179,7 @@ func (m *Mq) WaitToMq(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			m.logger.Info().Msg("ctx done mq.WaitToMq")
+			//m.logger.Info().Msg("ctx done mq.WaitToMq")
 			return
 		case msg := <-m.hglob.WsToMq:
 			m.logger.Info().Msgf("to mq topic: %s mes: %s\n", msg[0], msg[1])
@@ -195,7 +203,7 @@ func (m *Mq) CheckVers(ctx context.Context) {
 		ticker := time.NewTicker(30 * time.Second)
 		select {
 		case <-ctx.Done():
-			m.logger.Info().Msg("ctx done mq.CheckVers")
+			//m.logger.Info().Msg("ctx done mq.CheckVers")
 			return
 		case <-ticker.C:
 			if m.subOk.Load().(bool) {
@@ -205,7 +213,7 @@ func (m *Mq) CheckVers(ctx context.Context) {
 					if vers == "" {
 						topic := fmt.Sprintf("%s/%s/devrec/control", m.Login, m.us.Up[i].StrUnit)
 						message := "reqconfig"
-						m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
+						//m.logger.Info().Msgf("to mq topic: %s mes: %s\n", topic, message)
 						m.client.Publish(topic, QOS1, false, message)
 					}
 				}
