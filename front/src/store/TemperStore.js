@@ -53,6 +53,7 @@ class TemperStore {
 
   plusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
+    console.log(`plusFtoutCopy ${t}`);
     t = t + 1;
     runInAction(() => {
       this._nvobj[indObj].ftout_copy[indOut] = t;
@@ -60,6 +61,7 @@ class TemperStore {
   }
   minusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
+    console.log(`minusFtoutCopy ${t}`);
     t = t - 1;
     runInAction(() => {
       this._nvobj[indObj].ftout_copy[indOut] = t;
