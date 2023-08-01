@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import devSend from "../utils/devsend";
-import wsStore from "../store/WsStore";
+import wsStore from "./WsStore";
+import hostStore from "./HostStore";
 
 // const nvobj = {
 //   fout: [0, 0, 0, 0],
@@ -189,6 +190,29 @@ class TemperStore {
     const xx = devSend.parseMesJson(topic, message);
     if (xx && xx.valid) {
       this.cpyObj(xx);
+    }
+  }
+
+  ReceiveMesFromWs(src) {
+    let topic = "";
+    let message = "";
+    let username = "";
+    let group = "";
+    try {
+      username = src.username;
+      topic = src.topic;
+      message = src.message;
+      group = src.group;
+    } catch (e) {
+      console.log(e);
+    }
+    //console.log(`username: ${username}, topic: ${topic}, group: ${group}`);
+    if (username != hostStore.login) return;
+    if (group == "mqtt") {
+    } else if (group == "json") {
+      runInAction(() => {
+        this.recMesJson(topic, message);
+      });
     }
   }
 }

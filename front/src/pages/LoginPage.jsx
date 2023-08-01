@@ -5,12 +5,11 @@ import { Navigate } from "react-router-dom";
 import { HOME_ROUTE } from "../components/router/constRouter";
 import authStore from "../store/AuthStore";
 import hostStore from "../store/HostStore";
-import mq from "../store/Mq";
 
 const LoginPage = observer(() => {
   const singin = () => {
     hostStore.saveLoginToStorage();
-    mq.mqTryConnect();
+    //mq.mqTryConnect();
   };
 
   if (authStore.isAuth) {

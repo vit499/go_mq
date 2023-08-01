@@ -6,7 +6,7 @@ import OutStatus from "./OutStatus";
 import AjustTemper from "./AjustTemper";
 import Temper from "./Temper";
 
-const SetOut = observer(({ indObj, indOut }) => {
+const SetOut = ({ indObj, indOut }) => {
   return (
     <div className="row">
       <div className="col-md-4">
@@ -19,6 +19,6 @@ const SetOut = observer(({ indObj, indOut }) => {
       </div>
     </div>
   );
-});
+};
 
 export default SetOut;

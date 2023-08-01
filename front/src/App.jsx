@@ -8,10 +8,8 @@ import ErrorPage from "./pages/ErrorPage";
 import LoginPage from "./pages/LoginPage";
 import OutPage from "./pages/OutPage";
 import TemperComp from "./components/outs/TemperComp";
-import OutModernPage from "./pages/Modern/OutModernPage";
 import HostPage from "./pages/HostPage";
 import Description from "./components/mqtt/Description";
-import mq from "./store/Mq";
 import { useEffect } from "react";
 import wsStore from "./store/WsStore";
 //import router from "./components/router/routes";
@@ -40,10 +38,6 @@ const router = createBrowserRouter([
         element: <OutPage />,
       },
       {
-        path: "/outmodern/:indObj/:indOut",
-        element: <OutModernPage />,
-      },
-      {
         path: "/temper",
         element: <TemperComp />,
       },
@@ -60,7 +54,6 @@ function App() {
     console.log("app init");
     wsStore.Init();
     return () => {
-      //return () => mq.mqttDisconnect();
       wsStore.Disconnect();
     };
   }, []);

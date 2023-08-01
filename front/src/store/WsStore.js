@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import hostStore from "./HostStore";
-import mq from "./Mq";
+import descrStore from "./DescrStore";
 import temperStore from "./TemperStore";
 
 class WsStore {
@@ -55,7 +55,7 @@ class WsStore {
       //   //console.log(JSON.stringify(message, null, 2));
       // });
       const src = JSON.parse(event.data);
-      mq.ReceiveMesFromWs(src);
+      temperStore.ReceiveMesFromWs(src);
     };
     this.sock.onclose = () => {
       runInAction(() => {
@@ -73,10 +73,18 @@ class WsStore {
     };
   }
 
+  formTopicPub(indObj) {
+    const topic =
+      hostStore.login +
+      "/" +
+      temperStore._nvobj[indObj].nobj +
+      "/devrec/control";
+    return topic;
+  }
   WsPublish = async (val) => {
     const { indObj, payload } = val;
     temperStore.clear(indObj);
-    const topicPub = mq.formTopicPub(indObj);
+    const topicPub = this.formTopicPub(indObj);
 
     if (this._connectStatus !== "Connected") {
       //this.savedMes = val;
@@ -122,6 +130,8 @@ class WsStore {
     if (this._connectStatus !== "Closed") {
       return;
     }
+    hostStore.getHostFromStorage();
+    descrStore.getDescrFromStorage();
     this.username = hostStore.login; //Date.now();
     this.pass = hostStore.password;
     //this.url = process.env.REACT_APP_API_URL || "ws://localhost:8080/ws";
