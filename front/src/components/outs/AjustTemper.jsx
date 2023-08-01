@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import React, { useEffect, useState } from "react";
 import temperStore from "../../store/TemperStore";
-import TextTemperOut from "./TextTemperOut";
 
 const AjustTemper = observer(({ indObj, indOut }) => {
   const onPlus = () => {
@@ -15,15 +14,19 @@ const AjustTemper = observer(({ indObj, indOut }) => {
   };
   return (
     <div className="mb-2">
-      <button className="me-2" onClick={() => onMinus()}>
-        -
-      </button>
-      {/* <div>{`${temperStore.getFtOut(indObj, indOut)}`}</div> */}
-      <TextTemperOut indObj={indObj} indOut={indOut} />
-      <button className="ms-2 me-3" onClick={() => onPlus()}>
-        +
-      </button>
-      <button onClick={onSet}>Установить</button>
+      <div className="d-flex flex-row">
+        <button className="me-2" onClick={() => onMinus()}>
+          -
+        </button>
+        <div className="mt-1 ms-1">{` ${temperStore.getFtOut(
+          indObj,
+          indOut
+        )}`}</div>
+        <button className="ms-2 me-3" onClick={() => onPlus()}>
+          +
+        </button>
+        <button onClick={onSet}>Установить</button>
+      </div>
     </div>
   );
 });
