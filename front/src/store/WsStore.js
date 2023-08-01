@@ -54,8 +54,10 @@ class WsStore {
       //   //this.Message = message.message;
       //   //console.log(JSON.stringify(message, null, 2));
       // });
-      const src = JSON.parse(event.data);
-      temperStore.ReceiveMesFromWs(src);
+      runInAction(() => {
+        const src = JSON.parse(event.data);
+        temperStore.ReceiveMesFromWs(src);
+      });
     };
     this.sock.onclose = () => {
       runInAction(() => {
