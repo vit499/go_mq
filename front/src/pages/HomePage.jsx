@@ -6,15 +6,8 @@ import SetOut from "../components/outs/SetOut";
 import TemperComp from "../components/outs/TemperComp";
 import { LOGIN_ROUTE } from "../components/router/constRouter";
 import authStore from "../store/AuthStore";
-import mq from "../store/Mq";
-import temperStore from "../store/TemperStore";
 
 const HomePage = observer(() => {
-  // useEffect(() => {
-  //   // mq.mqttConnect();
-  //   return () => mq.mqttDisconnect();
-  // }, []);
-
   return (
     <div className="container">
       {!authStore.isAuth && (

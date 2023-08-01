@@ -12,12 +12,8 @@ const SetOut = observer(({ indObj, indOut }) => {
       <div className="col-md-4">
         <div className="mb-2">
           <hr />
-          {temperStore._nvobj[indObj].valid && (
-            <>
-              <OutStatus indObj={indObj} indOut={indOut} />
-              <AjustTemper indObj={indObj} indOut={indOut} />
-            </>
-          )}
+          <OutStatus indObj={indObj} indOut={indOut} />
+          <AjustTemper indObj={indObj} indOut={indOut} />
         </div>
         <Temper indObj={indObj} indOut={indOut} />
       </div>
