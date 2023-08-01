@@ -142,7 +142,7 @@ class TemperStore {
     else if (this._nvobj[2].nobj === obj.nobj) ind = 2;
 
     //runInAction(() => {
-    console.log(`rec ${obj.nobj} `);
+    //console.log(`rec ${obj.nobj} `);
     if (obj.fout.length !== 0)
       obj.fout.forEach((f, i) => {
         //console.log(`${o.nobj} fout${i + 1}=${o.fout[i].toString()}`);

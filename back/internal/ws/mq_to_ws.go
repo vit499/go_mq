@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	"log"
 )
@@ -142,6 +143,7 @@ func (h *Hub) CheckMes(client *Client, b []byte) {
 				return
 			}
 
+			time.Sleep(2 * time.Second)
 			//log.Printf("SendToWsJson <-client.send ")
 			select {
 			case client.send <- bytesMes:
