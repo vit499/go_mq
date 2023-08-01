@@ -15,14 +15,14 @@ const AjustTemper = observer(({ indObj, indOut }) => {
   return (
     <div className="mb-2">
       <div className="d-flex flex-row">
-        <button className="me-2" onClick={() => onMinus()}>
+        <button className="me-2" onClick={onMinus}>
           -
         </button>
         <div className="mt-1 ms-1">{` ${temperStore.getFtOut(
           indObj,
           indOut
         )}`}</div>
-        <button className="ms-2 me-3" onClick={() => onPlus()}>
+        <button className="ms-2 me-3" onClick={onPlus}>
           +
         </button>
         <button onClick={onSet}>Установить</button>

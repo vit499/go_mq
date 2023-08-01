@@ -4,12 +4,7 @@ import React, { useEffect, useState } from "react";
 import temperStore from "../../store/TemperStore";
 
 const Temper = observer(({ indObj, indOut }) => {
-  return (
-    <div>{` Температура=${temperStore.getTemper(
-      temperStore._nvobj[indObj].ind,
-      indOut
-    )} `}</div>
-  );
+  return <div>{` Температура=${temperStore.getTemper(indObj, indOut)} `}</div>;
 });
 
 export default Temper;
