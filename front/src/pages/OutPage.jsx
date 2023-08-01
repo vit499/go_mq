@@ -9,10 +9,6 @@ import authStore from "../store/AuthStore";
 const OutPage = observer(() => {
   const { indObj, indOut } = useParams();
   console.log(`indObj=${indObj} indOut=${indOut}`); //
-  // useEffect(() => {
-  //   // mq.mqttConnect();
-  //   return () => mq.mqttDisconnect();
-  // }, []);
 
   return (
     <div className="container">
