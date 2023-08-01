@@ -53,19 +53,23 @@ class TemperStore {
 
   plusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
-    console.log(`plusFtoutCopy ${t}`);
     t = t + 1;
     runInAction(() => {
+      console.log(`plusFtoutCopy ${t}`);
       this._nvobj[indObj].ftout_copy[indOut] = t;
     });
   }
   minusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
-    console.log(`minusFtoutCopy ${t}`);
     t = t - 1;
     runInAction(() => {
+      console.log(`minusFtoutCopy ${t}`);
       this._nvobj[indObj].ftout_copy[indOut] = t;
     });
+  }
+  getFtOut(indObj, indOut) {
+    const t = this._nvobj[indObj].ftout_copy[indOut];
+    return t;
   }
   SetFtout(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];

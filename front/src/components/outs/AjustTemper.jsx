@@ -17,7 +17,7 @@ const AjustTemper = observer(({ indObj, indOut }) => {
       <button className="me-2" onClick={() => onMinus()}>
         -
       </button>
-      {` ${temperStore._nvobj[indObj].ftout_copy[indOut]}`}
+      {`${temperStore.getFtOut(indObj, indOut)}`}
       <button className="ms-2 me-3" onClick={() => onPlus()}>
         +
       </button>
