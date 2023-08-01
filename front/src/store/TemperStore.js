@@ -142,6 +142,7 @@ class TemperStore {
     else if (this._nvobj[2].nobj === obj.nobj) ind = 2;
 
     runInAction(() => {
+      console.log(`rec ${obj.nobj} `);
       if (obj.fout.length !== 0)
         obj.fout.forEach((f, i) => {
           //console.log(`${o.nobj} fout${i + 1}=${o.fout[i].toString()}`);
@@ -179,12 +180,12 @@ class TemperStore {
       //console.log(`valid${ind}=${this._nvobj[ind].valid}`);
     });
   }
-  recMes(topic, message) {
-    const xx = devSend.parseMes(topic, message);
-    if (xx && xx.valid) {
-      this.cpyObj(xx);
-    }
-  }
+  // recMes(topic, message) {
+  //   const xx = devSend.parseMes(topic, message);
+  //   if (xx && xx.valid) {
+  //     this.cpyObj(xx);
+  //   }
+  // }
 
   recMesJson(topic, message) {
     const xx = devSend.parseMesJson(topic, message);
@@ -206,13 +207,13 @@ class TemperStore {
     } catch (e) {
       console.log(e);
     }
-    //console.log(`username: ${username}, topic: ${topic}, group: ${group}`);
+    //console.log(`username: ${username}, topic: ${topic}`);
     if (username != hostStore.login) return;
     if (group == "mqtt") {
     } else if (group == "json") {
-      runInAction(() => {
-        this.recMesJson(topic, message);
-      });
+      //runInAction(() => {
+      this.recMesJson(topic, message);
+      //});
     }
   }
 }
