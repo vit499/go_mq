@@ -1,4 +1,4 @@
-package service
+package units_service
 
 import (
 	"back/internal/hglob"

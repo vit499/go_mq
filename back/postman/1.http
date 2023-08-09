@@ -1,0 +1,71 @@
+
+@host = localhost:3100
+@hostdev = localhost:3100
+@authToken = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEyOCwiZXhwIjoxNjcyNjk2MDMyfQ.6cwMuqbrdE-LS4BlwTGopdH83CBPlxOZgobjANNLE-0
+@tokendev = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6MTY3MzE2NDA4MH0.Sb1EoPLKyn65GrDwAjm3ci07kEgDkFx_39r9fvxi5k0
+
+###
+GET http://{{host}}/api/users HTTP/1.1
+
+###
+POST http://{{host}}/api/temper/n5101 HTTP/1.1
+content-type: application/json
+
+{
+    "sensors": [
+        {
+            "label": "Package id 0",
+            "current": 63.0,
+            "high": 105.0
+        },
+        {
+            "label": "Core 0",
+            "current": 63.0,
+            "high": 105.0
+        },
+        {
+            "label": "Core 1",
+            "current": 63.0,
+            "high": 105.0
+        },
+        {
+            "label": "Core 2",
+            "current": 63.0,
+            "high": 105.0
+        },
+        {
+            "label": "Core 3",
+            "current": 63.0,
+            "high": 105.0
+        }
+    ]
+}
+
+###
+POST http://{{host}}/api/users HTTP/1.1
+content-type: application/json
+
+{
+    "email": "a2@b.ru",
+    "password": "1111"
+}
+
+###
+
+POST http://{{host}}/api/users/2/items HTTP/1.1
+content-type: application/json
+
+{
+    "title": "item1 of user2",
+    "description": "descr 2"
+}
+
+###
+GET http://{{host}}/api/items HTTP/1.1
+
+###
+GET http://{{host}}/api/items HTTP/1.1
+Authorization: Bearer {{tokendev}}
+
+###
+GET http://{{host}}/api/items/delete HTTP/1.1

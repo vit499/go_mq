@@ -131,7 +131,7 @@ func (h *Hub) CheckMes(client *Client, b []byte) {
 	pass := wsMes.Pass
 	if group == "connection" {
 		cnt := h.service.GetCountUnits()
-		time.Sleep(2 * time.Second)
+		time.Sleep(1 * time.Second) // android don't update
 		for i := 0; i < cnt; i++ {
 			s, err := h.service.GetUnitByInd(i, user)
 			if err != nil {

@@ -20,10 +20,10 @@ type Hub struct {
 	unregister chan *Client
 	//Reg        chan *Client
 	hglob   *hglob.Hglob
-	service *service.UnitsService
+	service *units_service.UnitsService
 }
 
-func NewHub(ctx context.Context, service *service.UnitsService, hglob *hglob.Hglob) *Hub {
+func NewHub(ctx context.Context, service *units_service.UnitsService, hglob *hglob.Hglob) *Hub {
 	h := Hub{
 		//broadcast:  make(chan []byte),
 		register:   make(chan *Client),

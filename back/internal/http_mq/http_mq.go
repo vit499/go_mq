@@ -2,28 +2,32 @@ package http_mq
 
 import (
 	//service "back/internal/service/units_service"
+	"back/internal/service/sensor_service"
 	"back/internal/service/units_service"
 	"back/internal/ws"
 	"back/pkg/config"
 	"back/pkg/logger"
 	"context"
 	"fmt"
-	"github.com/julienschmidt/httprouter"
+	"io"
 	"net/http"
 	"time"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 type HttpServer struct {
 	//units  *unit.Units
-	service *service.UnitsService
-	logger  *logger.Logger
-	hub     *ws.Hub
+	service       *units_service.UnitsService
+	sensorService *sensor_service.SensorService
+	logger        *logger.Logger
+	hub           *ws.Hub
 }
 
-func GetHttpServer(ctx context.Context, service *service.UnitsService, logger *logger.Logger, hub *ws.Hub) error {
+func GetHttpServer(ctx context.Context, service *units_service.UnitsService, sensorService *sensor_service.SensorService, logger *logger.Logger, hub *ws.Hub) error {
 	cfg := config.Get()
 	httpHost := cfg.HttpHost
-	h := HttpServer{service, logger, hub}
+	h := HttpServer{service, sensorService, logger, hub}
 
 	// mux := http.NewServeMux()
 	// srv := &http.Server{
@@ -38,6 +42,7 @@ func GetHttpServer(ctx context.Context, service *service.UnitsService, logger *l
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
+	router.POST("/api/temper/n5101", h.SetTemperN5101)
 	router.GET("/ws", h.Ws)
 	srv := &http.Server{Addr: httpHost, Handler: router}
 
@@ -63,18 +68,6 @@ func GetHttpServer(ctx context.Context, service *service.UnitsService, logger *l
 	h.logger.Info().Msg("Stop HTTP ")
 	return nil
 }
-
-// func (h *HttpServer) StartHttp(addr string) error {
-// 	router := httprouter.New()
-// 	router.GET("/", Index)
-// 	router.GET("/hello/:name", Hello)
-// 	router.GET("/api/units/:ind", h.GetUnit)
-// 	router.GET("/api/t", h.GetUnitTemper)
-// 	router.GET("/ws", h.Ws)
-
-// 	err := http.ListenAndServe(addr, router)
-// 	return err
-// }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Fprint(w, "Welcome!\n")
@@ -115,11 +108,29 @@ func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps ht
 		//
 		return
 	}
-
-	//s := fmt.Sprintf("outdoor=%d, floor0=%d", temper[0], temper[1])
-	// header := w.Header()
-	// header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
+}
+
+func (h *HttpServer) SetTemperN5101(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	t := time.Now()
+	defer func() {
+		t1 := time.Since(t)
+		h.logger.Info().Msgf("/api/settemperN5101 time: %v", t1)
+	}()
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		h.logger.Error().Msgf("post io.ReadAll: %v", err.Error())
+		return
+	}
+	err = h.sensorService.SetTemperFromN5101(body)
+	if err != nil {
+		h.logger.Error().Msgf("from service: %v", err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	//w.Write(b)
 
 }

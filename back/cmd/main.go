@@ -4,6 +4,8 @@ import (
 	"back/internal/hglob"
 	"back/internal/http_mq"
 	"back/internal/mq_mq"
+	"back/internal/sensor"
+	"back/internal/service/sensor_service"
 	"back/internal/service/units_service"
 	"back/internal/unit"
 	"back/internal/ws"
@@ -43,18 +45,20 @@ func run() error {
 
 	tg := tgbot.GetTgbot()
 	us := unit.Get(ctx, tg, l)
+	sens := sensor.NewDataSensor(tg, l)
 
-	service := service.NewUnitsService(us, hglob)
+	units_service := units_service.NewUnitsService(us, hglob)
+	sensorService := sensor_service.NewSensorService(sens, l)
 
 	err = mq_mq.Get(ctx, l, us, hglob)
 	if err != nil {
 		return err
 	}
 
-	hub := ws.NewHub(ctx, service, hglob)
+	hub := ws.NewHub(ctx, units_service, hglob)
 
 	go func() {
-		err := http_mq.GetHttpServer(ctx, service, l, hub)
+		err := http_mq.GetHttpServer(ctx, units_service, sensorService, l, hub)
 		if err != nil {
 			l.Error().Msg(err.Error())
 		}
