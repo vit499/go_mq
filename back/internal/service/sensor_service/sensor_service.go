@@ -5,6 +5,7 @@ import (
 	"back/pkg/logger"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type SensorService struct {
@@ -27,4 +28,10 @@ func (s *SensorService) SetTemperFromN5101(r []byte) error {
 
 	s.dataSensor.SetTemper(sensors)
 	return nil
+}
+
+func (s *SensorService) GetTemper() []byte {
+	t := s.dataSensor.GetTemper()
+	b := []byte(fmt.Sprintf("{temper: %d}", t))
+	return b
 }

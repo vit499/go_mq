@@ -25,11 +25,12 @@ type DataSensor struct {
 	Tg      *tgbot.Tgbot
 	logger  *logger.Logger
 	sensors *Sensors
+	temper  int
 }
 
 func NewDataSensor(tg *tgbot.Tgbot, logger *logger.Logger) *DataSensor {
 	s := make([]Sensor, 0)
-	return &DataSensor{tg, logger, &Sensors{Sensors: s}}
+	return &DataSensor{tg, logger, &Sensors{Sensors: s}, 15}
 }
 
 func (s *DataSensor) SetTemper(sensors Sensors) {
@@ -44,4 +45,9 @@ func (s *DataSensor) SetTemper(sensors Sensors) {
 			s.Tg.SendMes(str)
 		}
 	}
+	s.temper = int(s.sensors.Sensors[0].Current)
+}
+
+func (s *DataSensor) GetTemper() int {
+	return s.temper
 }

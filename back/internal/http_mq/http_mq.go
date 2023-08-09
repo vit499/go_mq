@@ -43,6 +43,7 @@ func GetHttpServer(ctx context.Context, service *units_service.UnitsService, sen
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
 	router.POST("/api/temper/n5101", h.SetTemperN5101)
+	router.GET("/metric", h.Metric)
 	router.GET("/ws", h.Ws)
 	srv := &http.Server{Addr: httpHost, Handler: router}
 
@@ -132,5 +133,20 @@ func (h *HttpServer) SetTemperN5101(w http.ResponseWriter, r *http.Request, ps h
 
 	w.WriteHeader(http.StatusOK)
 	//w.Write(b)
+
+}
+
+// # HELP custom_temperature Current temperature
+// # TYPE custom_temperature gauge
+// custom_temperature 6.563701921747622
+func (h *HttpServer) Metric(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	t := time.Now()
+	defer func() {
+		t1 := time.Since(t)
+		h.logger.Info().Msgf("/metric time: %v", t1)
+	}()
+	b := h.sensorService.GetTemper()
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 
 }
