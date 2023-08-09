@@ -43,7 +43,7 @@ func GetHttpServer(ctx context.Context, service *units_service.UnitsService, sen
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
 	router.POST("/api/temper/n5101", h.SetTemperN5101)
-	router.GET("/metric", h.Metric)
+	router.GET("/metrics", h.Metric)
 	router.GET("/ws", h.Ws)
 	srv := &http.Server{Addr: httpHost, Handler: router}
 
