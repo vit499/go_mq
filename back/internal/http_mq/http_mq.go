@@ -18,16 +18,16 @@ import (
 
 type HttpServer struct {
 	//units  *unit.Units
-	service       *units_service.UnitsService
+	unitService   *units_service.UnitsService
 	sensorService *sensor_service.SensorService
 	logger        *logger.Logger
 	hub           *ws.Hub
 }
 
-func GetHttpServer(ctx context.Context, service *units_service.UnitsService, sensorService *sensor_service.SensorService, logger *logger.Logger, hub *ws.Hub) error {
+func GetHttpServer(ctx context.Context, unitService *units_service.UnitsService, sensorService *sensor_service.SensorService, logger *logger.Logger, hub *ws.Hub) error {
 	cfg := config.Get()
 	httpHost := cfg.HttpHost
-	h := HttpServer{service, sensorService, logger, hub}
+	h := HttpServer{unitService, sensorService, logger, hub}
 
 	// mux := http.NewServeMux()
 	// srv := &http.Server{
@@ -77,7 +77,7 @@ func (h *HttpServer) Ws(w http.ResponseWriter, r *http.Request, ps httprouter.Pa
 	//ws.ServeWs(h.hub, w, r)
 	//h.logger.Info().Msgf("req ws %v", ps)
 	h.hub.ServeWs(w, r)
-	//h.service.FormJsonToWs("ab@m.ru")
+	//h.unitService.FormJsonToWs("ab@m.ru")
 }
 
 func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -86,7 +86,7 @@ func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 func (h *HttpServer) GetUnit(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	strInd := ps.ByName("ind")
-	b, err := h.service.GetUnit(strInd)
+	b, err := h.unitService.GetUnit(strInd)
 	if err != nil {
 		//
 		return
@@ -104,7 +104,7 @@ func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps ht
 		t1 := time.Since(t)
 		h.logger.Info().Msgf("/api/t time: %v", t1)
 	}()
-	b, err := h.service.GetUnitTemper()
+	b, err := h.unitService.GetUnitTemper()
 	if err != nil {
 		//
 		return
@@ -145,7 +145,8 @@ func (h *HttpServer) Metric(w http.ResponseWriter, r *http.Request, ps httproute
 		t1 := time.Since(t)
 		h.logger.Info().Msgf("/metric time: %v", t1)
 	}()
-	b := h.sensorService.GetTemper()
+	// b := h.sensorService.GetTemper()
+	b := h.unitService.GetTemperMetric()
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 

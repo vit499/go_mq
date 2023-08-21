@@ -69,6 +69,28 @@ func (h *UnitsService) GetUnitTemper() ([]byte, error) {
 	return []byte(s1), nil
 }
 
+// # HELP outdoor_temperature Outdoor temperature
+// # TYPE outdoor_temperature gauge
+// outdoor_temperature 6.56
+func (h *UnitsService) GetTemperMetric() []byte {
+	tempers, _ := h.units.GetUnitTemper(1)
+	t := tempers[1]
+	s1 := "# HELP loft_temperature Loft under roof temperature\n"
+	s2 := "# TYPE loft_temperature gauge\n"
+	s3 := fmt.Sprintf("loft_temperature %d\n", t)
+	s11 := fmt.Sprintf("%s%s%s", s1, s2, s3)
+
+	tempers, _ = h.units.GetUnitTemper(2)
+	t = tempers[0]
+	s1 = "# HELP outdoor_temperature Outdoor temperature\n"
+	s2 = "# TYPE outdoor_temperature gauge\n"
+	s3 = fmt.Sprintf("outdoor_temperature %d\n", t)
+	s20 := fmt.Sprintf("%s%s%s", s1, s2, s3)
+
+	b := []byte(fmt.Sprintf("%s%s", s11, s20))
+	return b
+}
+
 // func (h *UnitsService) FormJsonToWs(user string) []string {
 // 	for ind := 0; ind < h.units.Cnt; ind++ {
 

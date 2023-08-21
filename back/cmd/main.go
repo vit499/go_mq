@@ -47,7 +47,7 @@ func run() error {
 	us := unit.Get(ctx, tg, l)
 	sens := sensor.NewDataSensor(tg, l)
 
-	units_service := units_service.NewUnitsService(us, hglob)
+	unitService := units_service.NewUnitsService(us, hglob)
 	sensorService := sensor_service.NewSensorService(sens, l)
 
 	err = mq_mq.Get(ctx, l, us, hglob)
@@ -55,10 +55,10 @@ func run() error {
 		return err
 	}
 
-	hub := ws.NewHub(ctx, units_service, hglob)
+	hub := ws.NewHub(ctx, unitService, hglob)
 
 	go func() {
-		err := http_mq.GetHttpServer(ctx, units_service, sensorService, l, hub)
+		err := http_mq.GetHttpServer(ctx, unitService, sensorService, l, hub)
 		if err != nil {
 			l.Error().Msg(err.Error())
 		}
