@@ -45,7 +45,7 @@ func run() error {
 
 	tg := tgbot.GetTgbot()
 	us := unit.Get(ctx, tg, l)
-	sens := sensor.NewDataSensor(tg, l)
+	sens := sensor.NewDataSensor(ctx, tg, l)
 
 	unitService := units_service.NewUnitsService(us, hglob)
 	sensorService := sensor_service.NewSensorService(sens, l)

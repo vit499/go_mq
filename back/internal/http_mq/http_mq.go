@@ -145,8 +145,10 @@ func (h *HttpServer) Metric(w http.ResponseWriter, r *http.Request, ps httproute
 		t1 := time.Since(t)
 		h.logger.Info().Msgf("/metric time: %v", t1)
 	}()
-	// b := h.sensorService.GetTemper()
-	b := h.unitService.GetTemperMetric()
+	s1 := h.sensorService.GetTemper()
+	s2 := h.unitService.GetTemperMetric()
+	s := fmt.Sprintf("%s%s", s1, s2)
+	b := []byte(s)
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
 

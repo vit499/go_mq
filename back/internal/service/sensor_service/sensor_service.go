@@ -33,13 +33,16 @@ func (s *SensorService) SetTemperFromN5101(r []byte) error {
 // # HELP custom_temperature Current temperature
 // # TYPE custom_temperature gauge
 // custom_temperature 6.563701921747622
-func (s *SensorService) GetTemper() []byte {
-	t := s.dataSensor.GetTemper()
+func (sens *SensorService) GetTemper() string {
+	var s1, s2, s3 string = "", "", ""
+	t := sens.dataSensor.GetTemper()
 
-	s1 := "# HELP hm_n5101_temperature Current n5101 temperature\n"
-	s2 := "# TYPE custom_temperature gauge\n"
-	s3 := fmt.Sprintf("hm_n5101_temperature %d\n", t)
+	if t != 0x80 {
+		s1 = "# HELP hm_n5101_temperature Current n5101 temperature\n"
+		s2 = "# TYPE hm_n5101_temperature gauge\n"
+		s3 = fmt.Sprintf("hm_n5101_temperature %d\n", t)
+	}
 
-	b := []byte(fmt.Sprintf("%s%s%s", s1, s2, s3))
-	return b
+	s := fmt.Sprintf("%s%s%s", s1, s2, s3)
+	return s
 }

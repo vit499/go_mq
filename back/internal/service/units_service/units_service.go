@@ -72,23 +72,44 @@ func (h *UnitsService) GetUnitTemper() ([]byte, error) {
 // # HELP outdoor_temperature Outdoor temperature
 // # TYPE outdoor_temperature gauge
 // outdoor_temperature 6.56
-func (h *UnitsService) GetTemperMetric() []byte {
+func (h *UnitsService) GetTemperMetric() string {
+	var s1, s2, s3 string = "", "", ""
+	var s10, s11, s20, s21 string = "", "", "", ""
+
 	tempers, _ := h.units.GetUnitTemper(1)
-	t := tempers[1]
-	s1 := "# HELP loft_temperature Loft under roof temperature\n"
-	s2 := "# TYPE loft_temperature gauge\n"
-	s3 := fmt.Sprintf("loft_temperature %d\n", t)
-	s11 := fmt.Sprintf("%s%s%s", s1, s2, s3)
+	t := tempers[0]
+	if t != 0x80 {
+		s1 = "# HELP first_temperature First floor temperature\n"
+		s2 = "# TYPE first_temperature gauge\n"
+		s3 = fmt.Sprintf("first_temperature %d\n", t)
+		s10 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
+	t = tempers[1]
+	if t != 0x80 {
+		s1 = "# HELP loft_temperature Loft under roof temperature\n"
+		s2 = "# TYPE loft_temperature gauge\n"
+		s3 = fmt.Sprintf("loft_temperature %d\n", t)
+		s11 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
 
 	tempers, _ = h.units.GetUnitTemper(2)
 	t = tempers[0]
-	s1 = "# HELP outdoor_temperature Outdoor temperature\n"
-	s2 = "# TYPE outdoor_temperature gauge\n"
-	s3 = fmt.Sprintf("outdoor_temperature %d\n", t)
-	s20 := fmt.Sprintf("%s%s%s", s1, s2, s3)
+	if t != 0x80 {
+		s1 = "# HELP outdoor_temperature Outdoor temperature\n"
+		s2 = "# TYPE outdoor_temperature gauge\n"
+		s3 = fmt.Sprintf("outdoor_temperature %d\n", t)
+		s20 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
+	t = tempers[1]
+	if t != 0x80 {
+		s1 = "# HELP basement_temperature Basement temperature\n"
+		s2 = "# TYPE basement_temperature gauge\n"
+		s3 = fmt.Sprintf("basement_temperature %d\n", t)
+		s21 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
 
-	b := []byte(fmt.Sprintf("%s%s", s11, s20))
-	return b
+	s := fmt.Sprintf("%s%s%s%s", s10, s11, s20, s21)
+	return s
 }
 
 // func (h *UnitsService) FormJsonToWs(user string) []string {

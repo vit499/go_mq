@@ -3,7 +3,10 @@ package sensor
 import (
 	"back/pkg/logger"
 	"back/pkg/tgbot"
+	"context"
 	"fmt"
+	"sync"
+	"time"
 )
 
 /*
@@ -26,28 +29,55 @@ type DataSensor struct {
 	logger  *logger.Logger
 	sensors *Sensors
 	temper  int
+	mutex   sync.Mutex
+	cnt     int
 }
 
-func NewDataSensor(tg *tgbot.Tgbot, logger *logger.Logger) *DataSensor {
+func NewDataSensor(ctx context.Context, tg *tgbot.Tgbot, logger *logger.Logger) *DataSensor {
 	s := make([]Sensor, 0)
-	return &DataSensor{tg, logger, &Sensors{Sensors: s}, 15}
+	ds := DataSensor{tg, logger, &Sensors{Sensors: s}, 0x80, sync.Mutex{}, 0}
+	go ds.checkOnline(ctx)
+	return &ds
 }
 
-func (s *DataSensor) SetTemper(sensors Sensors) {
-	s.sensors = &sensors
+func (ds *DataSensor) SetTemper(sensors Sensors) {
+	ds.sensors = &sensors
 
 	for _, sensor := range sensors.Sensors {
 		label := sensor.Label
 		t := sensor.Current
-		s.logger.Info().Msgf("SetTemper sensor: %s = %f", label, t)
+		ds.logger.Info().Msgf("SetTemper sensor: %s = %f", label, t)
 		if t > 60 {
 			str := fmt.Sprintf("N5101 sensor: %s = %f", label, t)
-			s.Tg.SendMes(str)
+			ds.Tg.SendMes(str)
 		}
 	}
-	s.temper = int(s.sensors.Sensors[0].Current)
+	ds.mutex.Lock()
+	ds.cnt = 0
+	ds.temper = int(ds.sensors.Sensors[0].Current)
+	ds.mutex.Unlock()
 }
 
-func (s *DataSensor) GetTemper() int {
-	return s.temper
+func (ds *DataSensor) GetTemper() int {
+	return ds.temper
+}
+
+func (ds *DataSensor) checkOnline(ctx context.Context) {
+	for {
+		ticker := time.NewTicker(60 * time.Second)
+		select {
+		case <-ctx.Done():
+			// log.Printf("ctx done checkOnline")
+			return
+		case <-ticker.C:
+			ds.mutex.Lock()
+			if ds.temper != 0x80 {
+				ds.cnt++
+				if ds.cnt >= 30 {
+					ds.temper = 0x80
+				}
+			}
+			ds.mutex.Unlock()
+		}
+	}
 }
