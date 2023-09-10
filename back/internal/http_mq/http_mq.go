@@ -120,19 +120,24 @@ func (h *HttpServer) SetTemperN5101(w http.ResponseWriter, r *http.Request, ps h
 		h.logger.Info().Msgf("/api/settemperN5101 time: %v", t1)
 	}()
 
+	b := []byte("{}")
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		h.logger.Error().Msgf("post io.ReadAll: %v", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(b)
 		return
 	}
 	err = h.sensorService.SetTemperFromN5101(body)
 	if err != nil {
 		h.logger.Error().Msgf("from service: %v", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(b)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	//w.Write(b)
+	w.Write(b)
 
 }
 

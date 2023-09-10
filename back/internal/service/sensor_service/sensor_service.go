@@ -18,10 +18,11 @@ func NewSensorService(dataSensor *sensor.DataSensor, logger *logger.Logger) *Sen
 }
 func (s *SensorService) SetTemperFromN5101(r []byte) error {
 
-	// s.logger.Info().Msgf("r: %s", string(r))
+	//s.logger.Info().Msgf("r: %s", string(r))
 	var sensors sensor.Sensors
 	err := json.Unmarshal(r, &sensors)
 	if err != nil {
+		s.logger.Error().Msgf("err: %s", err.Error())
 		return errors.New("invalid request body")
 	}
 	// s.logger.Info().Msgf("SetTemperFromN5101 sensors: %v", sensors)
