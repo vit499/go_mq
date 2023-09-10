@@ -51,9 +51,9 @@ func (ds *DataSensor) SetTemper(sensors Sensors) {
 		a.Label = s.Label
 		a.Current = s.Current
 		a.High = s.High
-		ds.logger.Info().Msgf("SetTemper sensor: %s = %f", a.Label, a.Current)
+		//ds.logger.Info().Msgf("SetTemper sensor: %s = %f", a.Label, a.Current)
 		ds.sensors.Sensors = append(ds.sensors.Sensors, a)
-		if a.Current > 60 {
+		if a.Current > 70 {
 			str := fmt.Sprintf("N5101 sensor: %s = %f", a.Label, a.Current)
 			ds.Tg.SendMes(str)
 		}
@@ -70,14 +70,14 @@ func (ds *DataSensor) SetTemper(sensors Sensors) {
 	if len(ds.sensors.Sensors) == 0 {
 		return
 	}
-	for _, s := range ds.sensors.Sensors {
-		ds.logger.Info().Msgf(" sensor: %s = %f", s.Label, s.Current)
-	}
+	// for _, s := range ds.sensors.Sensors {
+	// 	ds.logger.Info().Msgf(" sensor: %s = %f", s.Label, s.Current)
+	// }
 	ds.mutex.Lock()
 	ds.cnt = 0
 	ds.temper = int(ds.sensors.Sensors[0].Current)
 	ds.mutex.Unlock()
-	ds.logger.Info().Msgf("temper = %d", ds.temper)
+	// ds.logger.Info().Msgf("temper = %d", ds.temper)
 }
 
 func (ds *DataSensor) GetTemper() int {
