@@ -7,6 +7,7 @@ import (
 	"back/pkg/logger"
 	"back/pkg/tgbot"
 	"context"
+	"fmt"
 
 	// "time"
 
@@ -53,7 +54,7 @@ func (us *Units) AddOneUnit(ctx context.Context, s string) {
 		u.Init(s)
 		us.Up[ind] = &u
 		us.Cnt = us.Cnt + 1
-		us.Up[ind].CheckingOnline(ctx)
+		us.Up[ind].CheckingOnline(ctx, us.UnitOffline)
 	}
 }
 
@@ -111,10 +112,28 @@ func (us *Units) FillBuf(topic string, mes string) {
 	}
 	topic = strings.Join(t[3:], "/")
 	//log.Printf("topic= %s, msg= %s ", topic, mes)
-	us.Up[indUnit].SetOnline(true)
+	restoreOnline := us.Up[indUnit].SetOnline(true)
 	us.Up[indUnit].FillBuf(topic, mes)
 	mesEvent := us.Up[indUnit].FillBufEv(topic, mes)
 	//us.Up[indUnit].PrintUnit()
+	if mesEvent != "" {
+		us.Tg.SendMes(mesEvent)
+	} else {
+		if restoreOnline {
+			val := fmt.Sprintf("%sR70100000", us.Up[indUnit].StrUnit)
+			log.Printf("UnitOnline %s", val)
+			mesEvent = CheckEv(val)
+			if mesEvent != "" {
+				us.Tg.SendMes(mesEvent)
+			}
+		}
+	}
+}
+
+func (us *Units) UnitOffline(s string) {
+	val := fmt.Sprintf("%sE70100000", s)
+	log.Printf("UnitOffline %s", val)
+	mesEvent := CheckEv(val)
 	if mesEvent != "" {
 		us.Tg.SendMes(mesEvent)
 	}

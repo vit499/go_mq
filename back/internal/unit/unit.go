@@ -54,8 +54,8 @@ func (u *Unit) Init(strUnit string) {
 	//go u.checkOnline()
 }
 
-func (u *Unit) CheckingOnline(ctx context.Context) {
-	go u.checkOnline(ctx)
+func (u *Unit) CheckingOnline(ctx context.Context, f func(string)) {
+	go u.checkOnline(ctx, f)
 	// ticker := time.NewTicker(1 * time.Second)
 	// defer ticker.Stop()
 	// for {
@@ -97,14 +97,19 @@ func (u *Unit) PrintUnit() {
 	}
 }
 
-func (u *Unit) SetOnline(v bool) {
+func (u *Unit) SetOnline(v bool) bool {
 	//log.Printf("online %s %t", u.StrUnit, v)
-	u.mutex.Lock()
+	ev := false
+	if !u.Online {
+		ev = true
+	}
 	u.Online = v
+	u.mutex.Lock()
 	u.cnt = 0
 	u.mutex.Unlock()
+	return ev
 }
-func (u *Unit) checkOnline(ctx context.Context) {
+func (u *Unit) checkOnline(ctx context.Context, f func(string)) {
 	for {
 		ticker := time.NewTicker(60 * time.Second)
 		select {
@@ -112,14 +117,15 @@ func (u *Unit) checkOnline(ctx context.Context) {
 			// log.Printf("ctx done checkOnline")
 			return
 		case <-ticker.C:
-			u.mutex.Lock()
 			if u.Online {
+				u.mutex.Lock()
 				u.cnt++
+				u.mutex.Unlock()
 				if u.cnt >= 10 {
 					u.Online = false
+					f(u.StrUnit)
 				}
 			}
-			u.mutex.Unlock()
 		}
 		// time.Sleep(60 * time.Second)
 		// u.mutex.Lock()
