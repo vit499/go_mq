@@ -21,10 +21,17 @@ class DescrStore {
       for (let out = 0; out < 4; out++) {
         let item = `out${obj}${out}`;
         let d = localStorage.getItem(item) || "";
-        //console.log(`get item=${item} d=${d}`);
-        if (d !== "") {
+        if (d === "") {
+          if (this.outs[obj][out] !== "") {
+            d = this.outs[obj][out];
+            localStorage.setItem(item, d);
+          }
+        } else if (d === "x") {
+          this.outs[obj][out] = "";
+        } else {
           this.outs[obj][out] = d;
         }
+        // console.log(`get item=${item} d=${d} s=${this.outs[obj][out]}`);
       }
     }
     for (let obj = 0; obj < 3; obj++) {
@@ -44,8 +51,12 @@ class DescrStore {
       for (let out = 0; out < 4; out++) {
         const item = `out${obj}${out}`;
         const d = this.outs[obj][out];
-        localStorage.setItem(item, d);
-        //console.log(`save item=${item} d=${d}`);
+        if (d === "") {
+          localStorage.setItem(item, "x");
+        } else {
+          localStorage.setItem(item, d);
+        }
+        // console.log(`save item=${item} d=${d}`);
       }
     }
     for (let obj = 0; obj < 3; obj++) {

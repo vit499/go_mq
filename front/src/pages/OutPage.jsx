@@ -8,7 +8,7 @@ import authStore from "../store/AuthStore";
 
 const OutPage = observer(() => {
   const { indObj, indOut } = useParams();
-  console.log(`indObj=${indObj} indOut=${indOut}`); //
+  // console.log(`indObj=${indObj} indOut=${indOut}`); //
 
   return (
     <div className="container">

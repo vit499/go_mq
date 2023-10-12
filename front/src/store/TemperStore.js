@@ -23,6 +23,8 @@ class TemperStore {
         online: false,
         valid: false,
         ftout_copy: [0, 0, 0, 0],
+        modify: false,
+        cnt10s: 0,
       },
       {
         ind: 1,
@@ -35,6 +37,8 @@ class TemperStore {
         online: false,
         valid: false,
         ftout_copy: [0, 0, 0, 0],
+        modify: false,
+        cnt10s: 0,
       },
       {
         ind: 2,
@@ -47,14 +51,20 @@ class TemperStore {
         online: false,
         valid: false,
         ftout_copy: [0, 0, 0, 0],
+        modify: false,
+        cnt10s: 0,
       },
     ];
+    this._launchTimer = false;
     makeAutoObservable(this, {});
   }
 
   plusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
     t = t + 1;
+    this._nvobj[indObj].modify = true;
+    this._nvobj[indObj].cnt10s = 0;
+    this.startTimer();
     runInAction(() => {
       //console.log(`plusFtoutCopy ${t}`);
       this._nvobj[indObj].ftout_copy[indOut] = t;
@@ -63,6 +73,9 @@ class TemperStore {
   minusFtoutCopy(indObj, indOut) {
     let t = this._nvobj[indObj].ftout_copy[indOut];
     t = t - 1;
+    this._nvobj[indObj].modify = true;
+    this._nvobj[indObj].cnt10s = 0;
+    this.startTimer();
     runInAction(() => {
       //console.log(`minusFtoutCopy ${t}`);
       this._nvobj[indObj].ftout_copy[indOut] = t;
@@ -73,6 +86,7 @@ class TemperStore {
     return t;
   }
   SetFtout(indObj, indOut) {
+    this._nvobj[indObj].modify = false;
     let t = this._nvobj[indObj].ftout_copy[indOut];
     const mes = `setout${indOut + 1}=${t}`;
     wsStore.WsPublish({ indObj: indObj, payload: mes });
@@ -93,6 +107,8 @@ class TemperStore {
       this._nvobj[indObj].online = false;
       this._nvobj[indObj].valid = false;
       this._nvobj[indObj].ftout_copy = [0, 0, 0, 0];
+      this._nvobj[indObj].modify = false;
+      this._nvobj[indObj].cnt10s = 0;
     });
   }
   clearAll() {
@@ -107,6 +123,8 @@ class TemperStore {
         o.online = false;
         o.valid = false;
         o.ftout_copy = [0, 0, 0, 0];
+        o.modify = false;
+        o.cnt10s = 0;
       });
     });
   }
@@ -150,9 +168,11 @@ class TemperStore {
       });
     if (obj.ftout.length !== 0)
       obj.ftout.forEach((f, i) => {
-        //console.log(`${o.nobj} ftout${i + 1}=${o.ftout[i].toString()}`);
+        // console.log(`${obj.nobj} ftout${i + 1}=${obj.ftout[i].toString()}`);
         this._nvobj[ind].ftout[i] = obj.ftout[i];
-        this._nvobj[ind].ftout_copy[i] = obj.ftout[i];
+        if (!this._nvobj[ind].modify) {
+          this._nvobj[ind].ftout_copy[i] = obj.ftout[i];
+        }
       });
     if (obj.sout.length !== 0)
       obj.sout.forEach((f, i) => {
@@ -215,6 +235,49 @@ class TemperStore {
       this.recMesJson(topic, message);
       //});
     }
+  }
+
+  inc() {
+    let m = 0;
+    let n = 0;
+    for (let i = 0; i < 3; i++) {
+      if (this._nvobj[i].modify) {
+        m = 1;
+        this._nvobj[i].cnt10s += 1;
+        if (this._nvobj[i].cnt10s > 2) {
+          this._nvobj[i].modify = false;
+          n = n | (1 << i);
+        }
+      }
+    }
+    if (m == 0) {
+      this.stopTimer();
+    }
+    runInAction(() => {
+      if (n & (1 << 0)) {
+        this._nvobj[0].ftout_copy[0] = this._nvobj[0].ftout[0];
+      }
+      if (n & (1 << 1)) {
+        this._nvobj[1].ftout_copy[1] = this._nvobj[1].ftout[1];
+      }
+      if (n & (1 << 2)) {
+        this._nvobj[2].ftout_copy[2] = this._nvobj[2].ftout[2];
+      }
+    });
+  }
+
+  stopTimer() {
+    this._launch = false;
+    if (this.timer !== null) {
+      clearInterval(this.timer);
+    }
+  }
+  startTimer() {
+    if (this._launch) return;
+    this._launch = true;
+    this.timer = setInterval(() => {
+      this.inc();
+    }, 10000);
   }
 }
 

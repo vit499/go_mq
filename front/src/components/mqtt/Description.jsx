@@ -8,6 +8,7 @@ const Description = observer(() => {
   };
   return (
     <div className="container">
+      <div>Описание выходов</div>
       {descrStore.outs.map((obj, indObj) => (
         <div key={indObj}>
           {obj.map((out, indOut) => (
@@ -26,6 +27,7 @@ const Description = observer(() => {
         </div>
       ))}
       <hr />
+      <div>Описание температур</div>
       {descrStore.tempers.map((obj, indObj) => (
         <div key={indObj}>
           {obj.map((temper, indTemper) => (
