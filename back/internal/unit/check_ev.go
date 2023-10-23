@@ -35,7 +35,7 @@ func CheckEv(s string) string {
 	// mes = descrObj[nobj]
 	if cid == "E130" {
 		res = true
-		mes = "Дача Тревога"
+		mes = "Тревога"
 		typeMes = "zone"
 	} else if cid == "E628" {
 		res = true
@@ -97,7 +97,7 @@ func CheckEv(s string) string {
 	// }
 
 	if typeMes == "zone" {
-		mes = fmt.Sprintf("%s зона %d", mes, zone)
+		mes = fmt.Sprintf("%s %s зона %d", descrObj[nobj], mes, zone)
 	} else if typeMes == "out" {
 		mes = fmt.Sprintf("%s выход %d", mes, zone)
 	} else if typeMes == "misc" {
