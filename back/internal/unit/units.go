@@ -122,7 +122,7 @@ func (us *Units) FillBuf(topic string, mes string) {
 		if restoreOnline {
 			val := fmt.Sprintf("%sR70100000", us.Up[indUnit].StrUnit)
 			log.Printf("UnitOnline %s", val)
-			mesEvent = CheckEv(val)
+			mesEvent = us.Up[indUnit].CheckEv(val)
 			if mesEvent != "" {
 				us.Tg.SendMes(mesEvent)
 			}
@@ -131,9 +131,13 @@ func (us *Units) FillBuf(topic string, mes string) {
 }
 
 func (us *Units) UnitOffline(s string) {
+	indUnit := us.getIndUnit(s)
+	if indUnit >= us.Cnt {
+		return
+	}
 	val := fmt.Sprintf("%sE70100000", s)
 	log.Printf("UnitOffline %s", val)
-	mesEvent := CheckEv(val)
+	mesEvent := us.Up[indUnit].CheckEv(val)
 	if mesEvent != "" {
 		us.Tg.SendMes(mesEvent)
 	}

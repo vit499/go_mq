@@ -44,7 +44,7 @@ func (u *Unit) RecEvent(src string) string {
 		key := p[0]
 		val := p[1]
 		if key == "dv_ev" {
-			ev = CheckEv(val)
+			ev = u.CheckEv(val)
 		}
 	}
 	return ev

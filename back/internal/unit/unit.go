@@ -26,6 +26,7 @@ type Unit struct {
 	Online    bool   `json:"Online"`
 	cnt       int
 	mutex     sync.Mutex
+	comm_fail bool
 }
 
 func (u *Unit) Init(strUnit string) {
@@ -51,6 +52,7 @@ func (u *Unit) Init(strUnit string) {
 	u.Online = false
 	u.cnt = 0
 	u.mutex = sync.Mutex{}
+	u.comm_fail = false
 	//go u.checkOnline()
 }
 

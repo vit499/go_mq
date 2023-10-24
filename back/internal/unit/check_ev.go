@@ -7,7 +7,7 @@ import (
 )
 
 // 1111E13002015
-func CheckEv(s string) string {
+func (u *Unit) CheckEv(s string) string {
 	res := false
 	ev := strings.Split(s, "")
 	nobj := strings.Join(ev[:4], "")
@@ -90,8 +90,12 @@ func CheckEv(s string) string {
 		res = true
 		typeMes = "misc"
 		mes = "потеря связи"
+		u.comm_fail = true
 	} else if cid == "R701" {
-		res = true
+		if u.comm_fail {
+			u.comm_fail = false
+			res = true
+		}
 		typeMes = "misc"
 		mes = "восстановление связи"
 	}
