@@ -24,6 +24,7 @@ func CheckEv(s string) string {
 	}
 	typeMes := ""
 	mes := ""
+	descr := ""
 
 	descrObj := map[string]string{
 		"0802": "Шкаф",
@@ -35,10 +36,16 @@ func CheckEv(s string) string {
 	// mes = descrObj[nobj]
 	if cid == "E130" {
 		res = true
-		mes = "Тревога"
 		typeMes = "zone"
+		if nobj == "0803" {
+			mes = "Дача Тревога "
+			descr = "(улица)"
+		} else if nobj == "0802" {
+			mes = "Шкаф Тревога "
+			descr = "(нужно снять шкаф)"
+		}
 	} else if cid == "E628" {
-		res = true
+		//res = true
 		typeMes = "misc"
 		mes = "изменение настроек"
 	} else if cid == "E702" {
@@ -46,11 +53,11 @@ func CheckEv(s string) string {
 		typeMes = "misc"
 		mes = "включение(перезапуск)"
 	} else if cid == "E062" {
-		res = true
+		//res = true
 		typeMes = "misc"
 		mes = "потеря wifi"
 	} else if cid == "R062" {
-		res = true
+		//res = true
 		typeMes = "misc"
 		mes = "восстановление wifi"
 	} else if (nobj == "0804") && (cid == "E715" || cid == "R715") {
@@ -97,7 +104,7 @@ func CheckEv(s string) string {
 	// }
 
 	if typeMes == "zone" {
-		mes = fmt.Sprintf("%s %s зона %d", descrObj[nobj], mes, zone)
+		mes = fmt.Sprintf("%s зона %d %s", mes, zone, descr)
 	} else if typeMes == "out" {
 		mes = fmt.Sprintf("%s выход %d", mes, zone)
 	} else if typeMes == "misc" {
