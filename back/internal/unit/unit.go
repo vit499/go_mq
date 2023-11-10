@@ -58,16 +58,6 @@ func (u *Unit) Init(strUnit string) {
 
 func (u *Unit) CheckingOnline(ctx context.Context, f func(string)) {
 	go u.checkOnline(ctx, f)
-	// ticker := time.NewTicker(1 * time.Second)
-	// defer ticker.Stop()
-	// for {
-	// 	select {
-	// 	case <-ctx.Done():
-	// 		return
-	// 	case <-ticker.C:
-	// 		u.checkOnline()
-	// 	}
-	// }
 }
 
 func (u *Unit) PrintUnit() {
@@ -112,8 +102,9 @@ func (u *Unit) SetOnline(v bool) bool {
 	return ev
 }
 func (u *Unit) checkOnline(ctx context.Context, f func(string)) {
+	ticker := time.NewTicker(60 * time.Second)
+	defer ticker.Stop()
 	for {
-		ticker := time.NewTicker(60 * time.Second)
 		select {
 		case <-ctx.Done():
 			// log.Printf("ctx done checkOnline")

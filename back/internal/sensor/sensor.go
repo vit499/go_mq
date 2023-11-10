@@ -85,8 +85,9 @@ func (ds *DataSensor) GetTemper() int {
 }
 
 func (ds *DataSensor) checkOnline(ctx context.Context) {
+	ticker := time.NewTicker(60 * time.Second)
+	defer ticker.Stop()
 	for {
-		ticker := time.NewTicker(60 * time.Second)
 		select {
 		case <-ctx.Done():
 			// log.Printf("ctx done checkOnline")

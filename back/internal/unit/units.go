@@ -21,11 +21,9 @@ import (
 )
 
 type Units struct {
-	Up  []*Unit
-	Cnt int
-	//mq     *mq_mq.Mq
-	Tg *tgbot.Tgbot
-	//hub    *ws.Hub
+	Up     []*Unit
+	Cnt    int
+	Tg     *tgbot.Tgbot
 	logger *logger.Logger
 	pass   string
 }
@@ -57,33 +55,6 @@ func (us *Units) AddOneUnit(ctx context.Context, s string) {
 		us.Up[ind].CheckingOnline(ctx, us.UnitOffline)
 	}
 }
-
-// func (us *Units) Sub() {
-// 	for i := 0; i < us.Cnt; i++ {
-// 		us.mq.Sub(us.Up[i].StrUnit, us.RecHandle)
-// 	}
-// }
-
-// func (us *Units) KeepAlive() {
-
-// 	for {
-// 		time.Sleep(20 * time.Second)
-// 		if !us.mq.IsSubOk() {
-// 			us.logger.Info().Msg("sub lost, reconnect...")
-// 			us.Sub()
-// 		}
-// 	}
-// }
-
-// func (us *Units) waitClientWs() {
-// 	for {
-// 		select {
-// 		case client := <-us.hub.Reg:
-// 			us.logger.Info().Msgf("new client, send ws json %v", client)
-// 			us.FormToWsJson()
-// 		}
-// 	}
-// }
 
 func (us *Units) CheckPass(p string) bool {
 	if us.pass != p {
@@ -181,4 +152,13 @@ func (us *Units) getJsonUnits(s string) string {
 
 func (us *Units) GetUnitVers(ind int) string {
 	return us.Up[ind].Vers
+}
+
+func (us *Units) GetUnitFtOut(s string) ([]int, bool) {
+	indUnit := us.getIndUnit(s)
+	if indUnit >= us.Cnt {
+		return nil, false
+	}
+	ftout := us.Up[indUnit].Ftout
+	return ftout, true
 }

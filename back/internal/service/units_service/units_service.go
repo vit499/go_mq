@@ -23,7 +23,6 @@ func NewUnitsService(us *unit.Units, hglob *hglob.Hglob) *UnitsService {
 func (h *UnitsService) GetUnit(strInd string) ([]byte, error) {
 	ind, err := strconv.Atoi(strInd)
 	if err != nil {
-		//
 		return nil, err
 	}
 	if ind >= h.units.Cnt {
