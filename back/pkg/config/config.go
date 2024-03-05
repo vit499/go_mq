@@ -11,10 +11,9 @@ import (
 type Config struct {
 	HttpHost string
 	// HttpPort string
-	MqHost   string
-	// MqPort   string
-	MqUser   string
-	MqPass   string
+	MqHost string
+	MqUser string
+	MqPass string
 	// PgHost   string
 	// PgPort   string
 	// PgDb     string
@@ -23,6 +22,7 @@ type Config struct {
 	TgToken  string
 	TgChat   string
 	Units    []string
+	MqEnable bool
 }
 
 var (
@@ -44,6 +44,11 @@ func Get() *Config {
 		config.TgChat = "*"
 		s := os.Getenv("UNITS")
 		config.Units = strings.Split(s, ",")
+		mqEn := os.Getenv("MQTT_ENABLE")
+		config.MqEnable = true
+		if mqEn == "0" {
+			config.MqEnable = false
+		}
 
 		b, err := json.MarshalIndent(config, "", "")
 		if err != nil {

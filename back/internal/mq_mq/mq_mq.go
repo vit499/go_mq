@@ -56,12 +56,15 @@ func Get(ctx context.Context, logger *logger.Logger, us *unit.Units, hglob *hglo
 	m.subOk.Store(false)
 	m.connected.Store(false)
 
-	m.InitClient()
-	go m.Connect()
-	go m.WaitToMq(ctx)
-	go m.CheckVers(ctx)
-	go m.Disconnect(ctx)
-	go m.WaitToCmdPub(ctx)
+	if cfg.MqEnable {
+		m.InitClient()
+		go m.Connect()
+		go m.WaitToMq(ctx)
+		go m.CheckVers(ctx)
+		go m.Disconnect(ctx)
+		go m.WaitToCmdPub(ctx)
+	}
+
 	return nil
 }
 

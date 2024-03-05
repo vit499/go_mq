@@ -3,20 +3,23 @@ package units_service
 import (
 	"back/internal/hglob"
 	"back/internal/unit"
+	"back/pkg/logger"
 	"errors"
 	"fmt"
 	"strconv"
 )
 
 type UnitsService struct {
-	units *unit.Units
-	hglob *hglob.Hglob
+	units  *unit.Units
+	hglob  *hglob.Hglob
+	logger *logger.Logger
 }
 
-func NewUnitsService(us *unit.Units, hglob *hglob.Hglob) *UnitsService {
+func NewUnitsService(us *unit.Units, hglob *hglob.Hglob, logger *logger.Logger) *UnitsService {
 	return &UnitsService{
-		units: us,
-		hglob: hglob,
+		units:  us,
+		hglob:  hglob,
+		logger: logger,
 	}
 }
 
@@ -35,37 +38,6 @@ func (h *UnitsService) GetUnit(strInd string) ([]byte, error) {
 		return nil, err
 	}
 	return b, nil
-}
-
-func (h *UnitsService) GetUnitTemper() ([]byte, error) {
-
-	temper := make([]int, 10)
-	descr := []string{
-		"f1",
-		"",
-		"",
-		"f1",
-		"f2",
-		"",
-		"outdoor",
-		"f0",
-		"",
-	}
-	for ind := 0; ind < h.units.Cnt; ind++ {
-		t, _ := h.units.GetUnitTemper(ind)
-		temper[ind*3] = t[0]
-		temper[ind*3+1] = t[1]
-		temper[ind*3+2] = t[2]
-	}
-	s := ""
-	for ind := 0; ind < 9; ind++ {
-		if temper[ind] != 0x80 {
-			s = fmt.Sprintf(" %s %s = %d <br>", s, descr[ind], temper[ind])
-		}
-	}
-	s1 := fmt.Sprintf("<html>%s</html>", s)
-
-	return []byte(s1), nil
 }
 
 // # HELP outdoor_temperature Outdoor temperature

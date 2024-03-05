@@ -1,7 +1,6 @@
 package http_mq
 
 import (
-	//service "back/internal/service/units_service"
 	"back/internal/service/sensor_service"
 	"back/internal/service/units_service"
 	"back/internal/ws"
@@ -9,7 +8,6 @@ import (
 	"back/pkg/logger"
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
@@ -42,6 +40,7 @@ func GetHttpServer(ctx context.Context, unitService *units_service.UnitsService,
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
+	router.GET("/api/a", h.GetFtoutAndTemp)
 	router.POST("/api/temper/n5101", h.SetTemperN5101)
 	router.GET("/metrics", h.Metric)
 	router.GET("/ws", h.Ws)
@@ -71,13 +70,10 @@ func GetHttpServer(ctx context.Context, unitService *units_service.UnitsService,
 }
 
 func Index(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Fprint(w, "Welcome!\n")
-}
-func (h *HttpServer) Ws(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	//ws.ServeWs(h.hub, w, r)
-	//h.logger.Info().Msgf("req ws %v", ps)
-	h.hub.ServeWs(w, r)
-	//h.unitService.FormJsonToWs("ab@m.ru")
+	// fmt.Fprint(w, "Welcome!\n")
+	s1 := "hello"
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(s1))
 }
 
 func Hello(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
@@ -96,65 +92,4 @@ func (h *HttpServer) GetUnit(w http.ResponseWriter, r *http.Request, ps httprout
 	header.Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(b)
-}
-
-func (h *HttpServer) GetUnitTemper(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	t := time.Now()
-	defer func() {
-		t1 := time.Since(t)
-		h.logger.Info().Msgf("/api/t time: %v", t1)
-	}()
-	b, err := h.unitService.GetUnitTemper()
-	if err != nil {
-		//
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-}
-
-func (h *HttpServer) SetTemperN5101(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	t := time.Now()
-	defer func() {
-		t1 := time.Since(t)
-		h.logger.Info().Msgf("/api/settemperN5101 time: %v", t1)
-	}()
-
-	b := []byte("{}")
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		h.logger.Error().Msgf("post io.ReadAll: %v", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(b)
-		return
-	}
-	err = h.sensorService.SetTemperFromN5101(body)
-	if err != nil {
-		h.logger.Error().Msgf("from service: %v", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write(b)
-		return
-	}
-
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-
-}
-
-// # HELP custom_temperature Current temperature
-// # TYPE custom_temperature gauge
-// custom_temperature 6.563701921747622
-func (h *HttpServer) Metric(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	t := time.Now()
-	defer func() {
-		t1 := time.Since(t)
-		h.logger.Info().Msgf("/metric time: %v", t1)
-	}()
-	s1 := h.sensorService.GetTemper()
-	s2 := h.unitService.GetTemperMetric()
-	s := fmt.Sprintf("%s%s", s1, s2)
-	b := []byte(s)
-	w.WriteHeader(http.StatusOK)
-	w.Write(b)
-
 }

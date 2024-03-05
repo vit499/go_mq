@@ -47,7 +47,7 @@ func run() error {
 	us := unit.Get(ctx, tg, l)
 	sens := sensor.NewDataSensor(ctx, tg, l)
 
-	unitService := units_service.NewUnitsService(us, hglob)
+	unitService := units_service.NewUnitsService(us, hglob, l)
 	sensorService := sensor_service.NewSensorService(sens, l)
 
 	err = mq_mq.Get(ctx, l, us, hglob)
