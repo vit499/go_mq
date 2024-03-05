@@ -44,6 +44,7 @@ func GetHttpServer(ctx context.Context, unitService *units_service.UnitsService,
 	router.POST("/api/temper/n5101", h.SetTemperN5101)
 	router.GET("/metrics", h.Metric)
 	router.GET("/ws", h.Ws)
+	router.POST("/objects/:objname/device_any_command", h.CmdFromMobile)
 	srv := &http.Server{Addr: httpHost, Handler: router}
 
 	go func() {

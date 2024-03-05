@@ -80,3 +80,5 @@ func (h *UnitsService) GetFtoutAndTemp() ([]byte, error) {
 
 	return s1, nil
 }
+
+// host/objects/0802/device_any_command?command=setout1,25,0

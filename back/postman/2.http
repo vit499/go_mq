@@ -1,0 +1,23 @@
+@host = localhost:3100
+@hostdev = localhost:3100
+@authToken = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEyOCwiZXhwIjoxNjcyNjk2MDMyfQ.6cwMuqbrdE-LS4BlwTGopdH83CBPlxOZgobjANNLE-0
+@tokendev = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6MTY3MzE2NDA4MH0.Sb1EoPLKyn65GrDwAjm3ci07kEgDkFx_39r9fvxi5k0
+
+###
+GET http://{{host}}/api/a HTTP/1.1
+
+###
+POST http://{{host}}/objects/0803/device_any_command?command=setout3=20,2 HTTP/1.1
+
+###
+POST http://{{host}}/objects/0803/device_any_command?command=reqfout HTTP/1.1
+
+###
+POST http://{{host}}/objects/0802/device_any_command?command=setout2=18,1 HTTP/1.1
+
+###
+POST http://{{host}}/objects/0802/device_any_command?command=xpart1=24438A9300001 HTTP/1.1
+
+###
+POST http://{{host}}/objects/0802/device_any_command?command=xpart1=24438A9300002 HTTP/1.1
+

@@ -173,3 +173,7 @@ func (h *Hub) CheckMes(client *Client, b []byte) {
 		}
 	}
 }
+
+func (h *Hub) ChanWsToMq(s []string) {
+	h.hglob.WsToMq <- s
+}
