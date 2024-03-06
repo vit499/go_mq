@@ -49,6 +49,9 @@ type FtoutAndTemp struct {
 	IndTemper int
 	Temper    int
 }
+type FtoutRes struct {
+	Arr []FtoutAndTemp `json:"arr"`
+}
 
 func (h *UnitsService) GetFtoutAndTemp() ([]byte, error) {
 
@@ -75,7 +78,10 @@ func (h *UnitsService) GetFtoutAndTemp() ([]byte, error) {
 		}
 	}
 
-	s1, _ := json.Marshal(ft)
+	arr := FtoutRes{
+		Arr: ft,
+	}
+	s1, _ := json.Marshal(arr)
 	h.logger.Info().Msgf("s1=%s", s1)
 
 	return s1, nil
