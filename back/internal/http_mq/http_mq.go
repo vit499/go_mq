@@ -40,6 +40,7 @@ func GetHttpServer(ctx context.Context, unitService *units_service.UnitsService,
 	router.GET("/hello/:name", Hello)
 	router.GET("/api/units/:ind", h.GetUnit)
 	router.GET("/api/t", h.GetUnitTemper)
+	router.GET("/data/2.5/weather", h.GetWeather) // http://api.openweathermap.org/data/2.5/weather?q=Kaliningrad&units=metric&APPID=0def5ea4b295f1a9d161837cb76cb667
 	router.GET("/api/a", h.GetFtoutAndTemp)
 	router.POST("/api/temper/n5101", h.SetTemperN5101)
 	router.GET("/metrics", h.Metric)
