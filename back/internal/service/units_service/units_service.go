@@ -45,7 +45,7 @@ func (h *UnitsService) GetUnit(strInd string) ([]byte, error) {
 // outdoor_temperature 6.56
 func (h *UnitsService) GetTemperMetric() string {
 	var s1, s2, s3 string = "", "", ""
-	var s00, s01, s10, s11, s20, s21 string = "", "", "", "", "", ""
+	var s00, s01, s10, s11, s20, s21, s30, s31 string = "", "", "", "", "", "", "", ""
 
 	tempers, _ := h.units.GetUnitTemper(0)
 	t := tempers[0]
@@ -95,7 +95,23 @@ func (h *UnitsService) GetTemperMetric() string {
 		s21 = fmt.Sprintf("%s%s%s", s1, s2, s3)
 	}
 
-	s := fmt.Sprintf("%s%s%s%s%s%s", s00, s01, s10, s11, s20, s21)
+	tempers, _ = h.units.GetUnitTemper(3)
+	t = tempers[0]
+	if t != 0x80 {
+		s1 = "# HELP utro3x3_temperature Utro3x3 temperature\n"
+		s2 = "# TYPE utro3x3_temperature gauge\n"
+		s3 = fmt.Sprintf("utro3x3_temperature %d\n", t)
+		s30 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
+	t = tempers[1]
+	if t != 0x80 {
+		s1 = "# HELP utro3x32_temperature Utro3x32 temperature\n"
+		s2 = "# TYPE utro3x32_temperature gauge\n"
+		s3 = fmt.Sprintf("utro3x32_temperature %d\n", t)
+		s31 = fmt.Sprintf("%s%s%s", s1, s2, s3)
+	}
+
+	s := fmt.Sprintf("%s%s%s%s%s%s%s%s", s00, s01, s10, s11, s20, s21, s30, s31)
 	return s
 }
 
